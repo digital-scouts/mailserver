@@ -20,6 +20,7 @@
     "build": "tsc",
     "lint": "./node_modules/eslint/bin/eslint.js  src --ext .ts",
     "ts-node-server": "ts-node src/server.ts",
+    "nodemon": "nodemon",
     "start": "node dist/src/server.js",
     "test": "jest",
     "fix-lint": "./node_modules/eslint/bin/eslint.js  src --ext .ts --fix"

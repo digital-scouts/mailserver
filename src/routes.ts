@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import apiSpec from '../openapi.json';
+import * as faker  from './mail/fake_receiver';
 
 
 const swaggerUiOptions = {
@@ -10,7 +11,7 @@ const swaggerUiOptions = {
 const router = Router();
 
 // Book routes
-// router.post('/book/add', BookController.add);
+router.get('/sendFake', faker.default);
 
 // Dev routes
 if (process.env.NODE_ENV === 'development') {

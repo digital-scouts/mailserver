@@ -8,7 +8,7 @@ services:
     image: sapza/mailserver
     restart: unless-stopped
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
       - PORT=3000
       - MONGO_URL=mongodb://mongo/mailserver
     volumes:

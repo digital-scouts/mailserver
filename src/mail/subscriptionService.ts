@@ -13,5 +13,5 @@ export async function handleNewSubscription(from: string, subject: string, text:
     distributor: text
   });
   const s = await subscription.save();
-  sender.sendMail(from, 'Confirm your Subscription', s._id);
+  sender.sendMail(from, 'Confirm your Subscription', s._id.toString());
 }

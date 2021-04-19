@@ -15,7 +15,7 @@ interface ISubscriptionModel extends Model<ISubscription> { }
 
 const schema = new Schema<ISubscription>({
   email: { type: String, index: true, required: true },
-  author: { type: String, index: true, required: true }
+  distributor: { type: String, index: true, required: true }
 });
 
 // Add timestamp plugin for createdAt and updatedAt in miliseconds from epoch

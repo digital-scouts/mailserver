@@ -20,6 +20,20 @@ const logTransports = [
         return value;
       }
     })
+  }), new transports.File({
+    level: 'debug',
+    filename: './logs/debug.log',
+    format: format.json({
+      replacer: (key, value) => {
+        if (key === 'debug') {
+          return {
+            message: (value as Error).message,
+            stack: (value as Error).stack
+          };
+        }
+        return value;
+      }
+    })
   }),
   new ConsoleLoggerTransport()
 ];

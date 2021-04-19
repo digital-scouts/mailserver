@@ -20,11 +20,11 @@ receiver.on('authorizeUser', (connection: any, username: string, password: strin
 
 /* Event emitted after a message was received and parsed. */
 receiver.on('message', (connection: any, data: any) => {
-  logger.info('_____________________s_');
-  logger.info(connection);
-  logger.info('----------------------');
-  logger.info(data);
-  logger.info('_____________________e_');
+  logger.debug('_____________________s_');
+  logger.debug(connection);
+  logger.debug('----------------------');
+  logger.debug(data);
+  logger.debug('_____________________e_');
 
   bridge.receive(data.from, data.to, data.subject, data.text);
 });

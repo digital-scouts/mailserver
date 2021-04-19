@@ -10,7 +10,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - MONGO_URL=mongodb://host.docker.internal:27017/books
+      - MONGO_URL=mongodb://mongo/mailserver
     volumes:
       - ./logs:/logs
     networks:
@@ -18,6 +18,17 @@ services:
     ports:
       - "3000:3000"
       - "25:25"
+
+  mongo:
+    image: mongo:4.4.4
+    container_name: mongo-dev
+    restart: always
+    networks:
+      - app-network
+    volumes:
+      - ./data/dev/mongo:/data/db
+    ports:
+      - "27017:27017"
 
 networks:
   app-network:

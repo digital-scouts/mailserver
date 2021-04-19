@@ -1,9 +1,8 @@
 import logger from '../logger';
-import * as bridge from './bridge';
-import fake_receiver from './fake_receiver';
-import { type } from 'os';
 
 const receiver = require('mailin');
+const subscription = require('./subscriptionService');
+const distributor = require('./distributorService');
 
 receiver.start({
   port: 25,
@@ -30,11 +29,17 @@ export function receiveMail(connection: any = fake_connection(), data: any = fak
   const to = data.message ? data.message.to[0].address : data.to[0].address;
   const subject = data.message ? data.message.subject : data.subject;
   const text = data.message ? data.message.text : data.text;
-  logger.debug('_____________________s_');
   logger.debug(from + ' ' + to + ' ' + subject + ' ' + text);
-  logger.debug('_____________________e_');
 
-  bridge.receive(from, to, subject, text);
+  handleReceive(from, to, subject, text);
+}
+
+function handleReceive(from: string, to: string, subject: string, text: string) {
+  if (to.split('@')[0] === 'subscribe') {
+    subscription.handleNewSubscription(from, subject, text);
+  } else if (to.split('@')[0].includes('-verteiler')) {
+    distributor.handleNewDistribution(from, to, subject, text);
+  }
 }
 
 

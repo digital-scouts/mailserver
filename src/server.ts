@@ -11,7 +11,7 @@ import app from './app';
 import SafeMongooseConnection from './lib/safe-mongoose-connection';
 import logger from './logger';
 
-require('./mail/mailhandler');
+require('./mail/receiver');
 
 const PORT = process.env.PORT || 3000;
 

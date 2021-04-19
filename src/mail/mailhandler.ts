@@ -1,2 +1,0 @@
-require('./receiver');
-require('./sender');

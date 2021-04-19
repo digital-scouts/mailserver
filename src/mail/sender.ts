@@ -5,7 +5,6 @@ const transporter = nodemailer.createTransport(
 );
 
 export function sendMail(to: string, subject: string, text: string) {
-
   transporter.sendMail({
     from: 'info@jannecklange.de',
     to,
@@ -18,5 +17,3 @@ export function sendMail(to: string, subject: string, text: string) {
     console.log(`Message Sent ${info.response}`);
   });
 }
-
-

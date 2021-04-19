@@ -1,6 +1,7 @@
-// import receiver from 'receiver';
+import logger from '../logger';
+import * as bridge from './bridge';
+
 const receiver = require('mailin');
-const bridge = require('./bridge');
 
 receiver.start({
   port: 25,
@@ -18,13 +19,12 @@ receiver.on('authorizeUser', (connection: any, username: string, password: strin
 });
 
 /* Event emitted after a message was received and parsed. */
-receiver.on('message', (connection: any, data: { text: string; subject: string; from: string; to: string; date: any; }) => {
-  console.log({
-    text: data.text,
-    subject: data.subject,
-    from: data.from,
-    to: data.to,
-    date: data.date
-  });
+receiver.on('message', (connection: any, data: any) => {
+  logger.info('_____________________s_');
+  logger.info(connection);
+  logger.info('----------------------');
+  logger.info(data);
+  logger.info('_____________________e_');
+
   bridge.receive(data.from, data.to, data.subject, data.text);
 });

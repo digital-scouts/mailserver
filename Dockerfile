@@ -1,4 +1,4 @@
-FROM node:12
+FROM node:current-alpine
 
 # Add package file
 COPY package*.json ./

@@ -1,5 +1,10 @@
 import Subscription from '../models/subscription';
 import * as sender from './sender';
+import logger from '../logger';
+
+export function handleNewServiceMail(from: string, to: string, subject: string, text: string) {
+  logger.debug('handleNewServiceMail');
+}
 
 /**
  *

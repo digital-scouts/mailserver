@@ -9,18 +9,46 @@ export interface IDistributor extends ITimeStampedDocument {
   _id: string;
   name: string;
   description: string;
-  email: string;
+  user: string;
+  tags: Array<string>;
+  sendRestricted: boolean;
+  subscribeRestricted: boolean;
 }
 
-interface IDistributorModel extends Model<IDistributor> { }
+interface IDistributorModel extends Model<IDistributor> {
+}
 
 const schema = new Schema<IDistributor>({
-  name: { type: String, index: true, required: true },
-  description: { type: String, index: true, required: true },
-  email: { type: String, index: true, required: true }
+  name: {
+    unique: true,
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  user: {
+    unique: true,
+    type: String,
+    required: true
+  },
+  tags: {
+    type: String,
+    unique: true,
+    required: true
+  },
+  sendRestricted: {
+    type: Boolean,
+    required: true,
+    default: true
+  },
+  subscribeRestricted: {
+    type: Boolean,
+    required: true,
+    default: false
+  }
 });
-
-// Add timestamp plugin for createdAt and updatedAt in miliseconds from epoch
 schema.plugin(TimeStampPlugin);
 
 const Distributor: IDistributorModel = model<IDistributor, IDistributorModel>('Distributor', schema);

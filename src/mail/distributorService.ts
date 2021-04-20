@@ -1,3 +1,5 @@
+import logger from '../logger';
+
 /**
  *
  * @param from    - string sender
@@ -7,5 +9,5 @@
  * todo add support for html and files
  */
 export function handleNewDistribution(from: string, to: string, subject: string, text: string) {
-
+  logger.debug('handleNewDistribution');
 }

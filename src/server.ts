@@ -10,6 +10,7 @@ import util from 'util';
 import app from './app';
 import SafeMongooseConnection from './lib/safe-mongoose-connection';
 import logger from './logger';
+import * as init from './db_loader/loadData';
 
 require('./mail/receiver');
 
@@ -18,7 +19,10 @@ const PORT = process.env.PORT || 3000;
 let debugCallback = null;
 if (process.env.NODE_ENV === 'development') {
   debugCallback = (collectionName: string, method: string, query: any, doc: string): void => {
-    const message = `${collectionName}.${method}(${util.inspect(query, { colors: true, depth: null })})`;
+    const message = `${collectionName}.${method}(${util.inspect(query, {
+      colors: true,
+      depth: null
+    })})`;
     logger.log({
       level: 'silly',
       message,
@@ -30,7 +34,10 @@ if (process.env.NODE_ENV === 'development') {
 const safeMongooseConnection = new SafeMongooseConnection({
   mongoUrl: process.env.MONGO_URL,
   debugCallback,
-  onStartConnection: mongoUrl => logger.info(`Connecting to MongoDB at ${mongoUrl}`),
+  onStartConnection: mongoUrl => {
+    init.loadData();
+    logger.info(`Connecting to MongoDB at ${mongoUrl}`);
+  },
   onConnectionError: (error, mongoUrl) => logger.log({
     level: 'error',
     message: `Could not connect to MongoDB at ${mongoUrl}`,

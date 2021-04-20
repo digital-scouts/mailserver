@@ -126,3 +126,5 @@ Temporary Items
 dist
 data
 /.idea/
+src/**/*.js
+src/**/*.js.map

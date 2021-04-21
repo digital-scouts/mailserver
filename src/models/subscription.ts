@@ -1,9 +1,5 @@
-import {
-  Model, Schema, model
-} from 'mongoose';
-import TimeStampPlugin, {
-  ITimeStampedDocument
-} from './plugins/timestamp-plugin';
+import { Model, Schema, model } from 'mongoose';
+import TimeStampPlugin, { ITimeStampedDocument } from './plugins/timestamp-plugin';
 
 export interface ISubscription extends ITimeStampedDocument {
   _id: string;
@@ -11,7 +7,8 @@ export interface ISubscription extends ITimeStampedDocument {
   distributor: string;
 }
 
-interface ISubscriptionModel extends Model<ISubscription> { }
+interface ISubscriptionModel extends Model<ISubscription> {
+}
 
 const schema = new Schema<ISubscription>({
   email: { type: String, index: true, required: true },

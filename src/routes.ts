@@ -25,7 +25,10 @@ router.post('/sendfake', (req, res) => {
 });
 
 router.get('/fake', (req, res) => {
-  res.sendFile(path.join(`${__dirname}/index.html`));
+  res.sendFile(path.join(`${__dirname}/views/fakesender.html`));
+});
+router.get('/subscribe', (req, res) => {
+  res.sendFile(path.join(`${__dirname}/views/subscribe.html`));
 });
 
 // Dev routes

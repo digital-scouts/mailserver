@@ -33,11 +33,6 @@ const schema = new Schema<IDistributor>({
     type: String,
     required: true
   },
-  tags: {
-    type: String,
-    unique: true,
-    required: true
-  },
   sendRestricted: {
     type: Boolean,
     required: true,

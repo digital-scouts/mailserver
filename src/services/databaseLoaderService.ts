@@ -1,5 +1,6 @@
 import Distributor from '../models/distriburor';
 import ServiceMail from '../models/serviceMails';
+import logger from '../logger';
 
 const distributorData = [
   {
@@ -51,9 +52,19 @@ const serviceMailData = [
   }
 ];
 
-export async function loadData() {
-  await Distributor.collection.drop();
-  await ServiceMail.collection.drop();
+async function tryDrop(x: any) {
+  try {
+    await x.collection.drop();
+  } catch (e) {
+    // empty
+  } finally {
+    logger.info(`${typeof x} Collection dropped`);
+  }
+}
+
+export async function databaseLoaderService() {
+  await tryDrop(Distributor);
+  await tryDrop(ServiceMail);
 
   distributorData.map(i => new Distributor(i).save());
   serviceMailData.map(i => new ServiceMail(i).save());

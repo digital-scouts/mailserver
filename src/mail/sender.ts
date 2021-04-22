@@ -1,4 +1,5 @@
 import * as nodemailer from 'nodemailer';
+import logger from '../logger';
 
 const transporter = nodemailer.createTransport(
   'smtps://info@jannecklange.de:rCbxWmTT66votw@smtp.strato.de/?pool=true'
@@ -12,8 +13,8 @@ export function sendMail(to: string, subject: string, text: string) {
     text
   }, (error, info) => {
     if (error) {
-      console.log(`error: ${error}`);
+      logger.error(`error: ${error}`);
     }
-    console.log(`Message Sent ${info.response}`);
+    logger.info(`Message Sent ${info.response}`);
   });
 }

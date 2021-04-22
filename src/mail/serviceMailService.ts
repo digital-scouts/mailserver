@@ -8,15 +8,23 @@ export function handleNewServiceMail(from: string, to: string, subject: string, 
 
 /**
  *
- * @param from    - sender
- * @param subject - subject of mail
- * @param text    - content of mail
+ * @param email
+ * @param name
+ * @param distributors
  */
-export async function handleNewSubscription(from: string, subject: string, text: string) {
+export async function handleNewSubscription(email: string, name: string, distributors: string[]) {
   const subscription = new Subscription({
-    email: from,
-    distributor: text
+    email,
+    name,
+    distributors
   });
-  const s = await subscription.save();
-  sender.sendMail(from, 'Confirm your Subscription', s._id.toString());
+
+  let s;
+  try {
+    s = await subscription.save();
+  } catch (e) {
+    return;
+    // todo handle save error
+  }
+  sender.sendMail(email, 'Confirm your Subscription', `Klicke auf den Link oder kopiere ihn in deinen Browser um änderung am Newsletter zu bestätigen ${process.env.HOST}/confirm?id=${s._id.toString()}`);
 }

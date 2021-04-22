@@ -18,7 +18,8 @@ interface SafeMongooseConnectionOptions {
 const defaultMongooseConnectionOptions: ConnectionOptions = {
   useNewUrlParser: true,
   useCreateIndex: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  useFindAndModify: true
 };
 
 /**

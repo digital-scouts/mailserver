@@ -3,7 +3,7 @@ import util from 'util';
 import app from './app';
 import SafeMongooseConnection from './lib/safe-mongoose-connection';
 import logger from './logger';
-import * as init from './db_loader/loadData';
+import * as init from './services/databaseLoaderService';
 
 require('./mail/receiver');
 
@@ -33,7 +33,7 @@ const safeMongooseConnection = new SafeMongooseConnection({
   mongoUrl: process.env.MONGO_URL,
   debugCallback,
   onStartConnection: mongoUrl => {
-    init.loadData();
+    init.databaseLoaderService();
     logger.info(`Connecting to MongoDB at ${mongoUrl}`);
   },
   onConnectionError: (error, mongoUrl) => logger.log({

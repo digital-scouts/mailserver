@@ -3,16 +3,28 @@ import TimeStampPlugin, { ITimeStampedDocument } from './plugins/timestamp-plugi
 
 export interface ISubscription extends ITimeStampedDocument {
   _id: string;
+  name: string;
   email: string;
-  distributor: string;
+  distributors: string;
+  confirmed: boolean;
 }
 
 interface ISubscriptionModel extends Model<ISubscription> {
 }
 
 const schema = new Schema<ISubscription>({
-  email: { type: String, index: true, required: true },
-  distributor: { type: String, index: true, required: true }
+  name: { type: String },
+  email: {
+    type: String,
+    unique: true,
+    required: true
+  },
+  distributors: [{ type: String }],
+  confirmed: {
+    type: Boolean,
+    required: true,
+    default: false
+  }
 });
 
 // Add timestamp plugin for createdAt and updatedAt in miliseconds from epoch

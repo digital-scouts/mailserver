@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang='de'>
 <head>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link href='https://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet' type='text/css'/>
     <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js'></script>
     <link rel='stylesheet' href='subscribe.css'>
 
     <title>Subscribe</title>
-
 </head>
 
 <body>
@@ -15,7 +16,8 @@
         Subscribe
     </div>
     <div class='message'>
-        <form method='post' action='/subscribe' style='display: flex; flex-wrap: wrap; justify-content: space-between'>
+        <form id="subscribeForm" onsubmit="return false;"
+              style='display: flex; flex-wrap: wrap; justify-content: space-between'>
             <input type='text' name='name' id='name' class='boxElement' placeholder=' Name* ' required>
 
             <input type='email' name='email' id='email' class='boxElement' placeholder=' Email* ' required
@@ -33,83 +35,109 @@
     <div class='left'></div>
     <div class='right'></div>
     <div class='top'></div>
-
-
-    <script>
-      const initDistributor = async () => {
-        const response = await fetch('/distributorlist', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        const myJson = await response.json(); //extract JSON from the http response
-
-        for (const checkboxDataKey of myJson) {
-          const label = document.createElement('label');
-          const input = document.createElement('input');
-          const b = document.createElement('b');
-          const a = document.createElement('a');
-
-          label.setAttribute('class', 'campaign-signup with-tooltip custom-checkbox');
-          input.setAttribute('name', 'distributor');
-          input.setAttribute('type', 'checkbox');
-          input.setAttribute('value', checkboxDataKey.user);
-          a.setAttribute('class', 'tip-above');
-          a.setAttribute('data-tip', checkboxDataKey.description);
-          a.innerText = ' ' + checkboxDataKey.name;
-
-          label.appendChild(input);
-          label.appendChild(b);
-          label.appendChild(a);
-
-          document.getElementById('checkbox-list')
-            .appendChild(label);
-        }
-      };
-      initDistributor();
-
-      $(document)
-        .ready(function () {
-          $('.frame')
-            .click(function () {
-              $('.top')
-                .addClass('open');
-              $('#button_open_envelope')
-                .addClass('hidden');
-              $('.message')
-                .addClass('pull');
-            });
-        });
-
-      function windowResize() {
-        const envelope = window.innerWidth * 0.4;
-        $('.right')
-          .css('border-right', `${envelope > 300 ? 300 : envelope}px solid #337efc`)
-          .css('left', `${envelope > 300 ? 300 : envelope}px`);
-        $('.left')
-          .css('border-left', `${envelope > 300 ? 300 : envelope}px solid #337efc`);
-        $('.top')
-          .css('border-right', `${envelope > 300 ? 300 : envelope}px solid transparent`)
-          .css('border-left', `${envelope > 300 ? 300 : envelope}px solid transparent`);
-        $('.bottom')
-          .css('width', `${envelope * 2 > 600 ? 600 : envelope * 2}px`);
-        $('.frame')
-          .css('width', `${envelope * 2 > 600 ? 600 : envelope * 2}px`)
-          .css('margin-top', `${window.innerHeight < 600 ? 50 : 250}px`);
-        $('.boxElement')
-          .css('width', `${envelope * 2 - 20 > 570 ? 570 : envelope * 2 - 20}px`);
-        $('.checkboxElement')
-          .css('width', `${envelope - 20 > 275 ? 275 : envelope - 20}px`);
-        $('#send')
-          .css('width', `${envelope * 2 - 10 > 580 ? 580 : envelope * 2 - 10}px`);
-        $('.top.open')
-          .css('display', window.innerHeight < 600 ? 'none' : 'block');
-      }
-
-      windowResize();
-      window.onresize = windowResize;
-    </script>
 </div>
+
+<script>
+  const initDistributor = async () => {
+    const response = await fetch('/distributorlist', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const myJson = await response.json(); //extract JSON from the http response
+
+    for (const checkboxDataKey of myJson) {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      const b = document.createElement('b');
+      const a = document.createElement('a');
+
+      label.setAttribute('class', 'campaign-signup with-tooltip custom-checkbox');
+      input.setAttribute('name', 'distributor');
+      input.setAttribute('type', 'checkbox');
+      input.setAttribute('value', checkboxDataKey.user);
+      a.setAttribute('class', 'tip-above');
+      a.setAttribute('data-tip', checkboxDataKey.description);
+      a.innerText = ' ' + checkboxDataKey.name;
+
+      label.appendChild(input);
+      label.appendChild(b);
+      label.appendChild(a);
+
+      document.getElementById('checkbox-list')
+        .appendChild(label);
+    }
+  };
+  initDistributor();
+
+  $(document)
+    .ready(function () {
+      $('.frame')
+        .click(function () {
+          $('.top')
+            .addClass('open');
+          $('#button_open_envelope')
+            .addClass('hidden');
+          $('.message')
+            .addClass('pull');
+        });
+    });
+
+  function windowResize() {
+    const envelope = window.innerWidth * 0.4;
+    $('.right')
+      .css('border-right', `${envelope > 300 ? 300 : envelope}px solid #337efc`)
+      .css('left', `${envelope > 300 ? 300 : envelope}px`);
+    $('.left')
+      .css('border-left', `${envelope > 300 ? 300 : envelope}px solid #337efc`);
+    $('.top')
+      .css('border-right', `${envelope > 300 ? 300 : envelope}px solid transparent`)
+      .css('border-left', `${envelope > 300 ? 300 : envelope}px solid transparent`);
+    $('.bottom')
+      .css('width', `${envelope * 2 > 600 ? 600 : envelope * 2}px`);
+    $('.frame')
+      .css('width', `${envelope * 2 > 600 ? 600 : envelope * 2}px`)
+      .css('margin-top', `${window.innerHeight < 600 ? 50 : 250}px`);
+    $('.boxElement')
+      .css('width', `${envelope * 2 - 20 > 570 ? 570 : envelope * 2 - 20}px`);
+    $('.checkboxElement')
+      .css('width', `${envelope - 20 > 275 ? 275 : envelope - 20}px`);
+    $('#send')
+      .css('width', `${envelope * 2 - 10 > 580 ? 580 : envelope * 2 - 10}px`);
+    $('.top.open')
+      .css('display', window.innerHeight < 600 ? 'none' : 'block');
+  }
+
+  $('#send')
+    .on('click', function (event) {
+      $.ajax({
+        url: window.location.href,
+        // contentType: 'multipart/form-data',
+        cache: false,
+        // contentType: 'text/html',
+        contentType: 'application/x-www-form-urlencoded',
+        // processData: false,
+        type: 'POST',
+        data: $('#subscribeForm')
+          .serialize(),
+        success: function (data) {
+          console.log(data);
+          alert('form submitted.');
+          //todo success handling
+        },
+        error: function (data) {
+          alert(data.responseText);
+        },
+        failure: function (data) {
+          console.log(data);
+          alert('form submit failed.');
+        }
+      });
+    });
+
+  windowResize();
+  window.onresize = windowResize;
+</script>
 </body>
 </html>

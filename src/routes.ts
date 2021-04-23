@@ -21,15 +21,20 @@ router.get('/distributorlist', async (req, res) => {
   res.json(await distributorService.getAllDistributors())
     .status(200);
 });
-router.post('/subscribe', (req, res) => {
-  if (req.body && req.body.name && req.body.email && req.body.distributor) {
-    serviceMailService.handleNewSubscription(req.body.email, req.body.name, req.body.distributor);
-    res.sendStatus(200);
-  } else {
+router.post('/subscribe', async (req, res) => {
+  if (!req.body || !req.body.name || !req.body.email || !req.body.distributor) {
     res.sendStatus(400);
+    return;
   }
-  // todo return html file
+  if (!await serviceMailService
+    .handleNewSubscription(req.body.email, req.body.name, req.body.distributor)) {
+    res.status(400)
+      .send('Die E-Mail-Adresse ist bereits im Verteiler. Änderungen können über einen Link am Ende der E-Mails aus dem Verteiler vorgenommen werden.');
+    return;
+  }
+  res.sendStatus(200);
 });
+
 router.get('/confirm', (req, res) => {
   if (!req.query || !req.query.id) {
     res.sendStatus(400);

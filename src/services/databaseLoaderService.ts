@@ -5,42 +5,42 @@ import logger from '../logger';
 const distributorData = [
   {
     name: 'Wölflinge',
-    description: 'Verteiler für alle Neuigkeiten zur Gruppenstunden und Veranstaltung deiner Wölflingsmeute.',
+    description: 'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Wölflingsmeute.',
     user: 'woelflinge',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Jungpfadfinder',
-    description: 'Verteiler für alle Neuigkeiten zur Gruppenstunden und Veranstaltung deiner Jungpfadfindersippe.',
+    description: 'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Jungpfadfindersippe.',
     user: 'jungpfadfinder',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Pfadfinder',
-    description: 'Verteiler für alle Neuigkeiten zur Gruppenstunden und Veranstaltung deiner Pfadfindersippe.',
+    description: 'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Pfadfindersippe.',
     user: 'pfadfinder',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Rover',
-    description: 'Verteiler für alle Neuigkeiten zur Gruppenstunden und Veranstaltung deiner Roverrunde.',
+    description: 'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Roverrunde.',
     user: 'rover',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Ehemalige',
-    description: 'Verteiler für alle Neuigkeiten und Veranstaltung für Ehemalige Mitglieder und Interessierte.',
+    description: 'Verteiler für Neuigkeiten und Veranstaltungen für Ehemalige Mitglieder und Interessierte.',
     user: 'ehemalige',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Leiterrunde',
-    description: 'Verteiler für alle Neuigkeiten und Informationsaustausch innerhalb der Leiterrunde. Der erhalt von E-Mails aus diesem verteiler muss von einem Administrator bestätigt werden.',
+    description: 'Verteiler für Neuigkeiten und Informationsaustausch innerhalb der Leiterrunde. Dieser Verteiler benötigt eine Freischaltung durch einen Admin.',
     user: 'leiterrunde',
     sendRestricted: true,
     subscribeRestricted: true

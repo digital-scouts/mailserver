@@ -1,6 +1,7 @@
 import User from '../models/user';
 import * as sender from './sender';
 import logger from '../logger';
+import Distributor from '../models/distriburor';
 
 export function handleNewServiceMail(from: string, to: string, subject: string, text: string) {
   logger.debug('handleNewServiceMail');
@@ -10,10 +11,11 @@ export function handleNewServiceMail(from: string, to: string, subject: string, 
  *
  * @param email
  * @param name
- * @param distributors
+ * @param targetDistributorEmails
  */
-export async function handleNewSubscription(email: string, name: string, distributors: string[])
-  : Promise<boolean> {
+export async function handleNewSubscription(
+  email: string, name: string, targetDistributorEmails: string[]
+): Promise<boolean> {
   let user = await User.findOne({ email })
     .exec();
   if (!user) {
@@ -24,15 +26,20 @@ export async function handleNewSubscription(email: string, name: string, distrib
       subscribedDistributors: []
     });
   }
+  logger.debug(JSON.stringify({ user, email, name }));
+  logger.debug(JSON.stringify({ targetDistributorEmails }));
 
   // update subscribedDistributors | override but keep confirmation
-  user.subscribedDistributors = distributors.map((distributor: string) => {
-    const subscribedDistributor = user.subscribedDistributors.find(u => u.email === distributor);
-    return {
-      email: distributor,
-      confirmed: subscribedDistributor ? subscribedDistributor.confirmed : false
-    };
-  });
+  user.subscribedDistributors = await Promise.all(targetDistributorEmails
+    .map(async (targetDistributorEmail: string) => {
+      const dbDistributor = await Distributor.findOne({ mailPrefix: targetDistributorEmail });
+      const userDistributor = user.subscribedDistributors
+        .find(d => d.distributor.mailPrefix === dbDistributor.mailPrefix);
+      return {
+        distributor: dbDistributor,
+        confirmed: userDistributor?.confirmed || false
+      };
+    }));
 
   logger.info(JSON.stringify(user.subscribedDistributors));
   try {
@@ -44,7 +51,7 @@ export async function handleNewSubscription(email: string, name: string, distrib
   user.subscribedDistributors.forEach(s => {
     if (!s.confirmed) {
       const confirmLink = `${process.env.HOST}/confirm?id=${s._id.toString()}`;
-      sender.sendMail(email, `Confirm your Subscription to ${s.email}`,
+      sender.sendMail(email, `Confirm your Subscription to ${s.distributor.mailPrefix}`,
         `Klicke <a href='${confirmLink}'>hier</a> um die Änderung am Newsletter zu bestätigen.`);
     }
   });

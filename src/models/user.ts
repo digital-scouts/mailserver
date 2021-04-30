@@ -1,12 +1,14 @@
 import { Model, Schema, model } from 'mongoose';
+import * as mongoose from 'mongoose';
 import TimeStampPlugin, { ITimeStampedDocument } from './plugins/timestamp-plugin';
+import { IDistributor } from './distriburor';
 
 export interface IUser extends ITimeStampedDocument {
   _id?: string;
   name: string;
   email: string;
-  subscribedDistributors: Array<{_id?: string, email: string, confirmed: boolean}>;
-  allowedDistributors: Array<string>;
+  subscribedDistributors: Array<{ _id?: string, distributor: IDistributor, confirmed: boolean }>;
+  allowedDistributors: Array<IDistributor>;
 }
 
 interface IUserModel extends Model<IUser> {
@@ -20,11 +22,15 @@ const schema = new Schema<IUser>({
     required: true
   },
   subscribedDistributors: [{
-    email: String,
+    distributor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Distributor'
+    },
     confirmed: Boolean
   }],
   allowedDistributors: [{
-    type: String
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Distributor'
   }]
 });
 

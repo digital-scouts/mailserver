@@ -6,49 +6,49 @@ const distributorData = [
   {
     name: 'Wölflinge',
     description: 'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Wölflingsmeute.',
-    user: 'woelflinge',
+    mailPrefix: 'woelflinge',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Jungpfadfinder',
     description: 'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Jungpfadfindersippe.',
-    user: 'jungpfadfinder',
+    mailPrefix: 'jungpfadfinder',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Pfadfinder',
     description: 'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Pfadfindersippe.',
-    user: 'pfadfinder',
+    mailPrefix: 'pfadfinder',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Rover',
     description: 'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Roverrunde.',
-    user: 'rover',
+    mailPrefix: 'rover',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Ehemalige',
     description: 'Verteiler für Neuigkeiten und Veranstaltungen für Ehemalige Mitglieder und Interessierte.',
-    user: 'ehemalige',
+    mailPrefix: 'ehemalige',
     sendRestricted: true,
     subscribeRestricted: false
   },
   {
     name: 'Leiterrunde',
     description: 'Verteiler für Neuigkeiten und Informationsaustausch innerhalb der Leiterrunde. Dieser Verteiler benötigt eine Freischaltung durch einen Admin.',
-    user: 'leiterrunde',
+    mailPrefix: 'leiterrunde',
     sendRestricted: true,
     subscribeRestricted: true
   }
 ];
 const serviceMailData = [
   {
-    user: 'subscribe'
+    mailPrefix: 'subscribe'
   }
 ];
 

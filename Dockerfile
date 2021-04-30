@@ -1,4 +1,4 @@
-FROM node:current-alpine
+FROM node:16-alpine
 
 # Add package file
 COPY package*.json ./
@@ -13,8 +13,5 @@ COPY openapi.json ./openapi.json
 
 # Build dist
 RUN npm run build
-
-# Expose port 3000
-EXPOSE 3000
 
 CMD npm run start

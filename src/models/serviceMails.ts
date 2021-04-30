@@ -7,14 +7,14 @@ import TimeStampPlugin, {
 
 export interface IServiceMail extends ITimeStampedDocument {
   _id: string;
-  user: string;
+  mailPrefix: string;
 }
 
 interface IServiceMailModel extends Model<IServiceMail> {
 }
 
 const schema = new Schema<IServiceMail>({
-  user: {
+  mailPrefix: {
     unique: true,
     type: String,
     required: true

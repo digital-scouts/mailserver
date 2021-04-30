@@ -8,6 +8,8 @@ import logger from './logger';
 import * as distributorService from './services/distributorService';
 import * as subscriptionService from './services/subscriptionService';
 import * as serviceMailService from './mail/serviceMailService';
+import Distributor from './models/distriburor';
+import User from './models/user';
 
 const swaggerUiOptions = {
   customCss: '.swagger-ui .topbar { display: none }'
@@ -69,13 +71,31 @@ if (process.env.NODE_ENV === 'development') {
   router.get('/fake', (req, res) => {
     res.sendFile(path.join(`${__dirname}/views/fakesender.html`));
   });
-  router.post('/sendfake', (req, res) => {
+
+  router.post('/dev/sendFake', (req, res) => {
     if (req.query && req.query.text && req.query.subject && req.query.to) {
-      logger.debug(`send fake mail ${req.query.text} ${req.query.subject} ${req.query.to}`);
+      logger.debug(`DEV - send fake mail ${req.query.text} ${req.query.subject} ${req.query.to}`);
       receiver.receiveMail(
         fakeEmail(req.query.text as string, req.query.subject as string, req.query.to as string)
       );
       res.sendStatus(204);
+    } else {
+      res.sendStatus(400);
+    }
+  });
+
+  router.post('/dev/setDistributor', async (req, res) => {
+    if (req.query && req.query.email && req.query.distributor) {
+      logger.debug(`DEV - allow Distributor ${req.query.email} ${req.query.distributor}`);
+      const distrib = await Distributor.findOne({ mailPrefix: req.query.distributor as string })
+        .exec();
+      const user = await User.findOne({ email: req.query.email as string })
+        .exec();
+      logger.debug(JSON.stringify(distrib));
+      logger.debug(JSON.stringify(user));
+      user.allowedDistributors.push(distrib);
+      await user.save();
+      res.status(200).send(user);
     } else {
       res.sendStatus(400);
     }

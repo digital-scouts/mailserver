@@ -1,7 +1,8 @@
 import logger from '../logger';
 import EmailError from '../errors/email-error';
-import Distributor from '../models/distriburor';
+import Distributor, { IDistributor } from '../models/distriburor';
 import ServiceMail from '../models/serviceMails';
+import User, { IUser } from '../models/user';
 
 const receiver = require('node-mailin');
 const serviceMailService = require('./serviceMailService');
@@ -89,15 +90,15 @@ export function fakeEmail(content: string, subject: string, to: string) {
 }
 
 async function didDistributorEmailExist(user: string): Promise<boolean> {
-  const res = await Distributor.findOne({ user })
+  const res = await Distributor.findOne({ mailPrefix: user })
     .exec();
-  return res?.user === user;
+  return res?.mailPrefix === user;
 }
 
 async function didServiceEmailExist(user: string): Promise<boolean> {
-  const res = await ServiceMail.findOne({ user })
+  const res = await ServiceMail.findOne({ mailPrefix: user })
     .exec();
-  return res?.user === user;
+  return res?.mailPrefix === user;
 }
 
 export async function receiveMail(data: any) {
@@ -109,12 +110,13 @@ export async function receiveMail(data: any) {
   } = data;
   logger.info(`receiveMail: ${from} ${to} ${subject} ${text}`);
 
-  const user = to.split('@')[0];
-  if (await didServiceEmailExist(user)) {
-    serviceMailService.handleNewServiceMail(from, user, subject, text);
-  } else if (await didDistributorEmailExist(user)) {
-    distributorService.handleNewDistribution(from, user, subject, text);
+  const targetMailPrefix = to.split('@')[0];
+  if (await didServiceEmailExist(targetMailPrefix)) {
+    serviceMailService.handleNewServiceMail(from, targetMailPrefix, subject, text);
+  } else if (await didDistributorEmailExist(targetMailPrefix)) {
+    distributorService.distributeMail();
   } else {
+    // should not happen
     logger.warn(`could not sort mail: ${from} ${to} ${subject} ${text}`);
   }
 }
@@ -122,7 +124,7 @@ export async function receiveMail(data: any) {
 receiver.start({
   port: 25,
   disableWebhook: true, // Disable the webhook posting.
-  SMTPBanner: 'Hi from a custom Mailin instance'
+  SMTPBanner: 'SMTPBanner: Hi from a custom Mailin instance'
 });
 
 /* Access simplesmtp server instance. */
@@ -134,24 +136,63 @@ receiver.on('authorizeUser', (connection: any, username: string, password: strin
   }
 });
 
-/* Event emitted when the "From" address is received by the smtp server. */
-// eslint-disable-next-line max-len
+/**
+ * Event emitted when the "From" address is received by the smtp server.
+ * blocks mails with 530 when user is blocked
+ * 530 - Die Nachricht wurde nicht zugestellt
+ * 550 - Die Adresse wurde nicht gefunden
+ */
 receiver.on('validateSender', async (session: any, address: string, callback: (error?: EmailError) => void) => {
-  if (address === 'sapzalp@gmail.com') { /* blacklist a specific email address*/
-    logger.info(`validateSender - user is blocked: ${address}`);
+  if (address === 'sapzalp@gmail.com') {
+    logger.info(`validateSender 530 - user is blocked: ${address}`);
     callback(new EmailError(530, 'You are blocked'));
-  } else {
-    callback();
+    return;
   }
+  logger.info(`validateSender ok - ${address}`);
+  callback();
 });
 
-/* Event emitted when the "To" address is received by the smtp server. */
+/**
+ * Event emitted when the "To" address is received by the smtp server.
+ * blocks mail with 550 when target email did not exist
+ * blocks mail with 530 when sender has no permission to distribute
+ * 530 - Die Nachricht wurde nicht zugestellt
+ * 550 - Die Adresse wurde nicht gefunden
+ */
 receiver.on('validateRecipient', async (session: any, address: string, callback: (error?: EmailError) => void) => {
-  const user = address.split('@')[0];
-  if (!await didDistributorEmailExist(user) && !await didServiceEmailExist(user)) {
-    logger.info(`validateRecipient - user did not exist: ${user}`);
-    callback(new EmailError(550, 'Email address not found on server'));
+  const targetMailPrefix = address.split('@')[0];
+  const userMail = session.envelope.mailFrom.address;
+  const distributor: IDistributor = await Distributor.findOne({ mailPrefix: targetMailPrefix })
+    .exec();
+
+  const serviceEmailExist = await didServiceEmailExist(targetMailPrefix);
+  if (distributor === null && !serviceEmailExist) {
+    logger.info(`validateRecipient 550 - Email address not found on server: ${targetMailPrefix}`);
+    callback(new EmailError(550, 'E-Mail existiert nicht auf dem Server'));
+    return;
   }
+  if (serviceEmailExist) {
+    callback();
+    logger.info(`validateRecipient ok (to service email) - ${targetMailPrefix}`);
+    return;
+  }
+  if (distributor !== null && distributor.sendRestricted) {
+    const user: IUser = await User.findOne({ email: userMail })
+      .exec();
+    if (user === null) {
+      logger.info(`validateRecipient 530 - user (${userMail}) did not exist - no permission to distribute: ${targetMailPrefix}`);
+      callback(new EmailError(530, 'Keine Berechtigung disen Verteiler zu nutzen'));
+      return;
+    }
+    const match = user.allowedDistributors
+      .find(allowedDistributor => allowedDistributor._id.toString() === distributor._id.toString());
+    if (match === undefined || match === null) {
+      logger.info(`validateRecipient 530 - user (${userMail}) exist - no permission to distribute: ${targetMailPrefix}`);
+      callback(new EmailError(530, 'Keine Berechtigung disen Verteiler zu nutzen'));
+      return;
+    }
+  }
+  logger.info(`validateRecipient ok - ${targetMailPrefix}`);
   callback();
 });
 

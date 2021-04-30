@@ -9,8 +9,7 @@ export interface IDistributor extends ITimeStampedDocument {
   _id: string;
   name: string;
   description: string;
-  user: string;
-  tags: Array<string>;
+  mailPrefix: string;
   sendRestricted: boolean;
   subscribeRestricted: boolean;
 }
@@ -28,7 +27,7 @@ const schema = new Schema<IDistributor>({
     type: String,
     required: true
   },
-  user: {
+  mailPrefix: {
     unique: true,
     type: String,
     required: true

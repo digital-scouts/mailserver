@@ -1,4 +1,13 @@
 import logger from '../logger';
+import Distributor, { IDistributor } from '../models/distriburor';
+
+function hasSenderPermission(from: string, mail: string): boolean {
+  return false;
+}
+
+function distributeMail() {
+
+}
 
 /**
  *
@@ -7,6 +16,16 @@ import logger from '../logger';
  * @param subject - string subject of mail
  * @param text    - string content of mail
  */
-export function handleNewDistribution(from: string, to: string, subject: string, text: string) {
+export async function handleNewDistribution(
+  from: string, to: string, subject: string, text: string
+) {
+  const mail = to.split('@')[0];
+  const distributor: IDistributor = await Distributor.findOne({ user: mail })
+    .exec();
+
+  if (distributor.sendRestricted && hasSenderPermission(from, mail)) {
+    distributeMail();
+  }
+
   logger.debug('handleNewDistribution');
 }

@@ -36,18 +36,26 @@ router.post('/subscribe', async (req, res) => {
 });
 
 router.get('/confirm', (req, res) => {
+  logger.debug(JSON.stringify(req.query));
   if (!req.query || !req.query.id) {
-    res.sendStatus(400);
+    res.status(400)
+      .send('ID missing in query');
     return;
   }
-  subscriptionService.confirmDistributor(req.body.id)
+  subscriptionService.confirmDistributor(req.query.id as string)
     .then(r => {
+      if (r === null) {
+        res.status(400)
+          .send('Subscriber confirmation failed');
+        return;
+      }
       logger.info(`Subscriber confirmed ${r.name}`);
       res.sendStatus(200);
     }, error => {
       logger.warn('Subscriber confirmation failed:');
       logger.warn(error);
-      res.sendStatus(400);
+      res.status(400)
+        .send('Subscriber confirmation failed');
     });
 
   // todo return html file

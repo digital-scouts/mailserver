@@ -114,7 +114,7 @@ export async function receiveMail(data: any) {
   if (await didServiceEmailExist(targetMailPrefix)) {
     serviceMailService.handleNewServiceMail(from, targetMailPrefix, subject, text);
   } else if (await didDistributorEmailExist(targetMailPrefix)) {
-    distributorService.distributeMail();
+    distributorService.distributeMail(data);
   } else {
     // should not happen
     logger.warn(`could not sort mail: ${from} ${to} ${subject} ${text}`);
@@ -161,6 +161,8 @@ receiver.on('validateSender', async (session: any, address: string, callback: (e
  */
 receiver.on('validateRecipient', async (session: any, address: string, callback: (error?: EmailError) => void) => {
   const targetMailPrefix = address.split('@')[0];
+  const targetMailSuffix = address.split('@')[1];
+  logger.debug(`validateRecipient - E-Mail Suffix: ${targetMailSuffix}`);
   const userMail = session.envelope.mailFrom.address;
   const distributor: IDistributor = await Distributor.findOne({ mailPrefix: targetMailPrefix })
     .exec();

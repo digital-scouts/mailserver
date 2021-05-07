@@ -121,84 +121,90 @@ export async function receiveMail(data: any) {
   }
 }
 
-receiver.start({
-  port: 25,
-  disableWebhook: true, // Disable the webhook posting.
-  SMTPBanner: 'SMTPBanner: Hi from a custom Mailin instance'
-});
+export function establishMailConnection() {
+  receiver.start({
+    port: 25,
+    disableWebhook: true// Disable the webhook posting.
+  });
 
-/* Access simplesmtp server instance. */
-receiver.on('authorizeUser', (connection: any, username: string, password: string, done: (arg0: Error, arg1: boolean) => void) => {
-  if (username === 'johnsmith' && password === 'mysecret') {
-    done(null, true);
-  } else {
-    done(new Error('Unauthorized!'), false);
-  }
-});
+  /* Access simplesmtp server instance. */
+  receiver.on('authorizeUser', (connection: any, username: string, password: string, done: (arg0: Error, arg1: boolean) => void) => {
+    if (username === 'johnsmith' && password === 'mysecret') {
+      done(null, true);
+    } else {
+      done(new Error('Unauthorized!'), false);
+    }
+  });
 
-/**
- * Event emitted when the "From" address is received by the smtp server.
- * blocks mails with 530 when user is blocked
- * 530 - Die Nachricht wurde nicht zugestellt
- * 550 - Die Adresse wurde nicht gefunden
- */
-receiver.on('validateSender', async (session: any, address: string, callback: (error?: EmailError) => void) => {
-  if (address === 'sapzalp@gmail.com') {
-    logger.info(`validateSender 530 - user is blocked: ${address}`);
-    callback(new EmailError(530, 'You are blocked'));
-    return;
-  }
-  logger.info(`validateSender ok - ${address}`);
-  callback();
-});
-
-/**
- * Event emitted when the "To" address is received by the smtp server.
- * blocks mail with 550 when target email did not exist
- * blocks mail with 530 when sender has no permission to distribute
- * 530 - Die Nachricht wurde nicht zugestellt
- * 550 - Die Adresse wurde nicht gefunden
- */
-receiver.on('validateRecipient', async (session: any, address: string, callback: (error?: EmailError) => void) => {
-  const targetMailPrefix = address.split('@')[0];
-  const targetMailSuffix = address.split('@')[1];
-  logger.debug(`validateRecipient - E-Mail Suffix: ${targetMailSuffix}`);
-  const userMail = session.envelope.mailFrom.address;
-  const distributor: IDistributor = await Distributor.findOne({ mailPrefix: targetMailPrefix })
-    .exec();
-
-  const serviceEmailExist = await didServiceEmailExist(targetMailPrefix);
-  if (distributor === null && !serviceEmailExist) {
-    logger.info(`validateRecipient 550 - Email address not found on server: ${targetMailPrefix}`);
-    callback(new EmailError(550, 'E-Mail existiert nicht auf dem Server'));
-    return;
-  }
-  if (serviceEmailExist) {
+  /**
+   * Event emitted when the "From" address is received by the smtp server.
+   * blocks emails with 530 when user is blocked
+   * 530 - Die Nachricht wurde nicht zugestellt
+   * 550 - Die Adresse wurde nicht gefunden
+   */
+  receiver.on('validateSender', async (session: any, address: string, callback: (error?: EmailError) => void) => {
+    if (address === 'sapzalp@gmail.com') {
+      logger.info(`validateSender 530 - user is blocked: ${address}`);
+      callback(new EmailError(530, 'You are blocked'));
+      return;
+    }
+    logger.info(`validateSender ok - ${address}`);
     callback();
-    logger.info(`validateRecipient ok (to service email) - ${targetMailPrefix}`);
-    return;
-  }
-  if (distributor !== null && distributor.sendRestricted) {
-    const user: IUser = await User.findOne({ email: userMail })
-      .exec();
-    if (user === null) {
-      logger.info(`validateRecipient 530 - user (${userMail}) did not exist - no permission to distribute: ${targetMailPrefix}`);
-      callback(new EmailError(530, 'Keine Berechtigung disen Verteiler zu nutzen'));
-      return;
-    }
-    const match = user.allowedDistributors
-      .find(allowedDistributor => allowedDistributor._id.toString() === distributor._id.toString());
-    if (match === undefined || match === null) {
-      logger.info(`validateRecipient 530 - user (${userMail}) exist - no permission to distribute: ${targetMailPrefix}`);
-      callback(new EmailError(530, 'Keine Berechtigung disen Verteiler zu nutzen'));
-      return;
-    }
-  }
-  logger.info(`validateRecipient ok - ${targetMailPrefix}`);
-  callback();
-});
+  });
 
-/* Event emitted after a message was received and parsed. */
-receiver.on('message', (connection: any, data: any, content: any) => {
-  receiveMail(data);
-});
+  /**
+   * Event emitted when the "To" address is received by the smtp server.
+   * blocks mail with 550 when target email did not exist
+   * blocks mail with 530 when sender has no permission to distribute
+   * 530 - Die Nachricht wurde nicht zugestellt
+   * 550 - Die Adresse wurde nicht gefunden
+   */
+  receiver.on('validateRecipient', async (session: any, address: string, callback: (error?: EmailError) => void) => {
+    const targetMailPrefix = address.split('@')[0];
+    const targetMailSuffix = address.split('@')[1];
+    logger.debug(`validateRecipient - E-Mail Suffix: ${targetMailSuffix}`);
+    const userMail = session.envelope.mailFrom.address;
+    const distributor: IDistributor = await Distributor.findOne({ mailPrefix: targetMailPrefix })
+      .exec();
+
+    const serviceEmailExist = await didServiceEmailExist(targetMailPrefix);
+    if (distributor === null && !serviceEmailExist) {
+      logger.info(`validateRecipient 550 - Email address not found on server: ${targetMailPrefix}`);
+      callback(new EmailError(550, 'E-Mail existiert nicht auf dem Server'));
+      return;
+    }
+    if (serviceEmailExist) {
+      callback();
+      logger.info(`validateRecipient ok (to service email) - ${targetMailPrefix}`);
+      return;
+    }
+    if (distributor !== null && distributor.sendRestricted) {
+      const user: IUser = await User.findOne({ email: userMail })
+        .exec();
+      if (user === null) {
+        logger.info(`validateRecipient 530 - user (${userMail}) did not exist - no permission to distribute: ${targetMailPrefix}`);
+        callback(new EmailError(530, 'Keine Berechtigung disen Verteiler zu nutzen'));
+        return;
+      }
+      const match = user.allowedDistributors
+        .find(allowedDistributor => allowedDistributor._id.toString() === distributor._id.toString());
+      if (match === undefined || match === null) {
+        logger.info(`validateRecipient 530 - user (${userMail}) exist - no permission to distribute: ${targetMailPrefix}`);
+        callback(new EmailError(530, 'Keine Berechtigung disen Verteiler zu nutzen'));
+        return;
+      }
+    }
+    logger.info(`validateRecipient ok - ${targetMailPrefix}`);
+    callback();
+  });
+
+  /* Event emitted after a message was received and parsed. */
+  receiver.on('message', (connection: any, data: any, content: any) => {
+    receiveMail(data);
+  });
+
+  receiver.on('error', (error: any) => {
+    logger.error('Mailin error');
+    logger.error(error);
+  });
+}

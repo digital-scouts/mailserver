@@ -4,18 +4,18 @@ import app from './app';
 import SafeMongooseConnection from './lib/safe-mongoose-connection';
 import logger from './logger';
 import * as init from './services/databaseLoaderService';
-
-require('./mail/receiver');
+import * as mailSender from './mail/sender';
+import * as mailReceiver from './mail/receiver';
 
 const result = dotenv.config();
 if (result.error) {
-  dotenv.config({ path: '.env.default' });
+  dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
 }
 
 const PORT = process.env.PORT || 3000;
 
 let debugCallback = null;
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'dev') {
   debugCallback = (collectionName: string, method: string, query: any, doc: string): void => {
     const message = `${collectionName}.${method}(${util.inspect(query, {
       colors: true,
@@ -44,10 +44,33 @@ const safeMongooseConnection = new SafeMongooseConnection({
   onConnectionRetry: mongoUrl => logger.info(`Retrying to MongoDB at ${mongoUrl}`)
 });
 
-const serve = () => app.listen(PORT, () => {
-  logger.debug(`🌏 Express server started at http://localhost:${PORT}`);
+const shutdown = () => {
+  console.log('\n'); /* eslint-disable-line */
+  logger.info('Gracefully shutting down');
+  logger.info('Closing the MongoDB connection');
+  safeMongooseConnection.close(err => {
+    if (err) {
+      logger.log({
+        level: 'error',
+        message: 'Error shutting closing mongo connection',
+        error: err
+      });
+    } else {
+      logger.info('Mongo connection closed successfully');
+    }
+    process.exit(0);
+  }, true);
+};
 
-  if (process.env.NODE_ENV === 'development') {
+const serve = () => app.listen(PORT, async () => {
+  if (!await mailSender.openConnection()) {
+    logger.debug('Mail sender connection could not established -> SHUTDOWN');
+    shutdown();
+  }
+  mailReceiver.establishMailConnection();
+
+  logger.debug(`🌏 Express server started at http://localhost:${PORT} with ${process.env.NODE_ENV} environment variables`);
+  if (process.env.NODE_ENV === 'dev') {
     // This route is only present in development mode
     logger.debug(`⚙️  Swagger UI hosted at http://localhost:${PORT}/dev/api-docs`);
   }
@@ -65,19 +88,5 @@ if (process.env.MONGO_URL == null) {
 
 // Close the Mongoose connection, when receiving SIGINT
 process.on('SIGINT', () => {
-  console.log('\n'); /* eslint-disable-line */
-  logger.info('Gracefully shutting down');
-  logger.info('Closing the MongoDB connection');
-  safeMongooseConnection.close(err => {
-    if (err) {
-      logger.log({
-        level: 'error',
-        message: 'Error shutting closing mongo connection',
-        error: err
-      });
-    } else {
-      logger.info('Mongo connection closed successfully');
-    }
-    process.exit(0);
-  }, true);
+  shutdown();
 });

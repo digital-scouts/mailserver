@@ -20,7 +20,8 @@ const logTransports = [
         return value;
       }
     })
-  }), new transports.File({
+  }),
+  new transports.File({
     level: 'debug',
     filename: './logs/debug.log',
     format: format.json({
@@ -44,7 +45,7 @@ const logger = createLogger({
   ),
   transports: logTransports,
   defaultMeta: { service: 'api' },
-  level: process.env.NODE_ENV === 'development' ? 'silly' : 'warn'
+  level: process.env.NODE_ENV === 'dev' ? 'silly' : 'warn'
 });
 
 export default logger;

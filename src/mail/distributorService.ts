@@ -32,7 +32,6 @@ export async function distributeMail(data: any) {
   } = data;
 
   const recipients = await getRecipients(to);
-  logger.debug(`Empfänger: ${JSON.stringify(recipients)}`);
 
-  sender.sendDistributorEmail(from, recipients, subject, text);
+  sender.sendDistributorEmail(from, recipients, subject, text, to);
 }

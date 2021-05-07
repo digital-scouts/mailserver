@@ -36,7 +36,6 @@ router.post('/subscribe', async (req, res) => {
   }
   res.sendStatus(200);
 });
-
 router.get('/confirm', (req, res) => {
   logger.debug(JSON.stringify(req.query));
   if (!req.query || !req.query.id) {
@@ -62,9 +61,18 @@ router.get('/confirm', (req, res) => {
 
   // todo return html file
 });
+router.get('/unsubscribe', (req, res) => {
+  logger.debug(JSON.stringify(req.query));
+  if (!req.query || !req.query.dis || !req.query.sub) {
+    res.status(400)
+      .send('dis or sub missing in query');
+    return;
+  }
+  res.sendStatus(203);
+});
 
 // Dev routes
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'dev') {
   router.use('/dev/api-docs', swaggerUi.serve);
   router.get('/dev/api-docs', swaggerUi.setup(apiSpec, swaggerUiOptions));
 
@@ -95,7 +103,8 @@ if (process.env.NODE_ENV === 'development') {
       logger.debug(JSON.stringify(user));
       user.allowedDistributors.push(distrib);
       await user.save();
-      res.status(200).send(user);
+      res.status(200)
+        .send(user);
     } else {
       res.sendStatus(400);
     }

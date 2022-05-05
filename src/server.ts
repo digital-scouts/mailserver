@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import util from 'util';
 import app from './app';
 import SafeMongooseConnection from './lib/safe-mongoose-connection';
@@ -9,7 +9,7 @@ import * as mailReceiver from './mail/receiver';
 
 const result = dotenv.config();
 if (result.error) {
-  dotenv.config({ path: `.env.${process.env.NODE_ENV}` });
+  dotenv.config({ path: `${__dirname}/env/.env.${process.env.NODE_ENV}` });
 }
 
 const PORT = process.env.PORT || 3000;

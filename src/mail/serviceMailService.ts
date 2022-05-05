@@ -26,7 +26,11 @@ export async function handleNewSubscription(
       subscribedDistributors: []
     });
   }
-  logger.debug(JSON.stringify({ user, email, name }));
+  logger.debug(JSON.stringify({
+    user,
+    email,
+    name
+  }));
   logger.debug(JSON.stringify({ targetDistributorEmails }));
 
   // update subscribedDistributors | override but keep confirmation

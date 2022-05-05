@@ -104,6 +104,7 @@ async function didServiceEmailExist(user: string): Promise<boolean> {
 export async function receiveMail(data: any) {
   const from = data.from.value[0].address;
   const to = data.to.value[0].address;
+  // todo multiple to´s (mehrere Verteiler)
   const {
     subject,
     text
@@ -187,7 +188,7 @@ export function establishMailConnection() {
         return;
       }
       const match = user.allowedDistributors
-        .find(allowedDistributor => allowedDistributor._id.toString() === distributor._id.toString());
+        .find(allowedDist => allowedDist._id.toString() === distributor._id.toString());
       if (match === undefined || match === null) {
         logger.info(`validateRecipient 530 - user (${userMail}) exist - no permission to distribute: ${targetMailPrefix}`);
         callback(new EmailError(530, 'Keine Berechtigung disen Verteiler zu nutzen'));

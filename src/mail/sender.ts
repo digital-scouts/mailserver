@@ -49,8 +49,7 @@ export function sendDistributorEmail(from: string, to: Array<{ name: string, add
     preview: false
   });
 
-  // eslint-disable-next-line no-restricted-syntax
-  for (const receiver of to) {
+  to.forEach(receiver => {
     const unsubscribeLink = `${process.env.HOST}/unsubscribe?dis=${distributor}&sub=${receiver.address}`;
     email.send({
       template: path.join(__dirname, 'emails', 'default'),
@@ -76,7 +75,7 @@ export function sendDistributorEmail(from: string, to: Array<{ name: string, add
     })
       .then(() => logger.info('email has been send!'))
       .catch(logger.error);
-  }
+  });
 }
 
 export function sendMail(to: string, subject: string, text: string) {

@@ -10,6 +10,8 @@
     }
   },
   "rules": {
+    "operator-linebreak": ["warn", "after"],
+    "implicit-arrow-linebreak": "off",
     "linebreak-style": 0,
     "import/extensions": [
       0,

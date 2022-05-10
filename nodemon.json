@@ -8,6 +8,9 @@
   "watch": [
     "src"
   ],
+  "env": {
+    "NODE_ENV": "dev"
+  },
   "exec": "npm run eslint && npm run ts-node-server",
   "ext": "ts"
 }

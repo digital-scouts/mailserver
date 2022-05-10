@@ -128,3 +128,5 @@ data
 /.idea/
 src/**/*.js
 src/**/*.map
+.tmp
+.vscode/

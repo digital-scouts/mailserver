@@ -1,20 +1,22 @@
+# Mailserver
 
+Dieser Mail-Server ist zur einfachen Weiterleitung von E-Mails an Opt-In Nutzer gedacht.
 
 ## I. Development
 
 ### Start dev server
+
 Starting the dev server also starts MongoDB as a service in a docker container using the compose script at `docker-compose.dev.yml`.
 
-```
-$ npm run nodemon
-```
-Running the above commands results in 
+```$ npm run nodemon```
+Running the above commands results in
+
 * 🌏 **API Server** running at `http://localhost:3000`
 * ⚙️**Swagger UI** at `http://localhost:3000/dev/api-docs`
 * 🛢️ **MongoDB** running at `mongodb://localhost:27017`
 
-
 ### Environment
+
 To edit environment variables, create a file with name `.env` and copy the contents from `.env.default` to start with.
 
 | Var Name  | Type  | Default | Description  |
@@ -31,22 +33,24 @@ To edit environment variables, create a file with name `.env` and copy the conte
 ## II. Architecture
 
 ## III. Aufgaben
+
 ### MVP
-- [ ] Senden an mehrere Verteiler gleichzeitig
-- [ ] Vom Verteiler abmelden / Einstellungen ändern
-- [ ] Besseres Feedback beim anmelden
-- [ ] Administrative Oberfläche (Nutzer einsehen / Sender zulassen)
+
+* [ ] Senden an mehrere Verteiler gleichzeitig
+* [ ] Vom Verteiler abmelden / Einstellungen ändern
+* [X] Am Verteiler mittels Opt-In anmelden
+* [ ] Administrative Oberfläche (Nutzer einsehen / Sender zulassen)
 
 ### Spätere Aufgaben
-- [ ] Spamschutz
-- [ ] E-Mail Historie
-- [ ] Sendungsstatus zu E-Mails und Empfängern
-- [ ] HTML Templates
+
+* [ ] Spamschutz
+* [ ] E-Mail Historie
+* [ ] Sendungsstatus zu E-Mails und Empfängern
+* [ ] HTML Templates
 
 ## IV. Funktionen
-- Nutzer können sich selbstständig im Verteiler eintragen (Opt-In)
-  - Dazu wird eine Bestätigungs-Mail versendet.
-- Es können E-Mails an eine Verteiler-Adresse gesendet werden.
-  - E-Mail wird an alle Opt-In Nutzer weitergeleitet, wenn der Absender zugelassen ist.
 
-
+* Nutzer können sich selbstständig im Verteiler eintragen (Opt-In)
+  * Dazu wird eine Bestätigungs-Mail versendet.
+* Es können E-Mails an eine Verteiler-Adresse gesendet werden.
+  * E-Mail wird an alle Opt-In Nutzer weitergeleitet, wenn der Absender zugelassen ist.

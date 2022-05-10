@@ -12,6 +12,14 @@ services:
     ports:
       - "27017:27017"
 
+  fake-smtp:
+    build: github.com/Nilhcem/FakeSMTP
+    image: fake-smtp
+    volumes:
+      - '.tmp:/output'
+    ports:
+      - "250:25"
+
 networks:
   dev-network:
     driver: bridge

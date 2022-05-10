@@ -79,14 +79,8 @@ const serve = () =>
       logger.warn('Mail sender connection could not established -> SHUTDOWN');
       shutdown();
     }
-    if (process.env.MAIL_USE_SERVER === 'true') {
-      mailReceiver.startMailServerReceiverConnection();
-    } else if (process.env.MAIL_USE_CLIENT === 'true') {
-      mailReceiver.startMailInboxListener();
-    } else {
-      logger.warn('No receiver configured -> SHUTDOWN');
-      shutdown();
-    }
+
+    mailReceiver.startMailInboxListener();
 
     logger.debug(
       `🌏 Express server started at http://localhost:${PORT} with ${process.env.NODE_ENV} environment variables`

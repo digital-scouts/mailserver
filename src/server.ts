@@ -9,14 +9,23 @@ import * as mailReceiver from './mail/receiver';
 
 const result = dotenv.config();
 if (result.error) {
-  dotenv.config({ path: `${__dirname}/env/.env.${process.env.NODE_ENV}` });
+  dotenv.config({
+    path: `${__dirname}/env/.env.${
+      process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'
+    }`
+  });
 }
 
 const PORT = process.env.PORT || 3000;
 
 let debugCallback = null;
 if (process.env.NODE_ENV === 'dev') {
-  debugCallback = (collectionName: string, method: string, query: any, doc: string): void => {
+  debugCallback = (
+    collectionName: string,
+    method: string,
+    query: any,
+    doc: string
+  ): void => {
     const message = `${collectionName}.${method}(${util.inspect(query, {
       colors: true,
       depth: null
@@ -32,23 +41,25 @@ if (process.env.NODE_ENV === 'dev') {
 const safeMongooseConnection = new SafeMongooseConnection({
   mongoUrl: process.env.MONGO_URL,
   debugCallback,
-  onStartConnection: mongoUrl => {
+  onStartConnection: (mongoUrl: string) => {
     init.databaseLoaderService();
     logger.info(`Connecting to MongoDB at ${mongoUrl}`);
   },
-  onConnectionError: (error, mongoUrl) => logger.log({
-    level: 'error',
-    message: `Could not connect to MongoDB at ${mongoUrl}`,
-    error
-  }),
-  onConnectionRetry: mongoUrl => logger.info(`Retrying to MongoDB at ${mongoUrl}`)
+  onConnectionError: (error, mongoUrl) =>
+    logger.log({
+      level: 'error',
+      message: `Could not connect to MongoDB at ${mongoUrl}`,
+      error
+    }),
+  onConnectionRetry: (mongoUrl: string) =>
+    logger.info(`Retrying to MongoDB at ${mongoUrl}`)
 });
 
 const shutdown = () => {
   console.log('\n'); /* eslint-disable-line */
   logger.info('Gracefully shutting down');
   logger.info('Closing the MongoDB connection');
-  safeMongooseConnection.close(err => {
+  safeMongooseConnection.close((err: Error) => {
     if (err) {
       logger.log({
         level: 'error',
@@ -62,25 +73,37 @@ const shutdown = () => {
   }, true);
 };
 
-const serve = () => app.listen(PORT, async () => {
-  if (!await mailSender.openConnection()) {
-    logger.debug('Mail sender connection could not established -> SHUTDOWN');
-    shutdown();
-  }
-  mailReceiver.establishMailConnection();
+const serve = () =>
+  app.listen(PORT, async () => {
+    if (!(await mailSender.openConnection())) {
+      logger.warn('Mail sender connection could not established -> SHUTDOWN');
+      shutdown();
+    }
+    if (process.env.MAIL_USE_SERVER === 'true') {
+      mailReceiver.startMailServerReceiverConnection();
+    } else if (process.env.MAIL_USE_CLIENT === 'true') {
+      mailReceiver.startMailInboxListener();
+    } else {
+      logger.warn('No receiver configured -> SHUTDOWN');
+      shutdown();
+    }
 
-  logger.debug(`🌏 Express server started at http://localhost:${PORT} with ${process.env.NODE_ENV} environment variables`);
-  if (process.env.NODE_ENV === 'dev') {
-    // This route is only present in development mode
-    logger.debug(`⚙️  Swagger UI hosted at http://localhost:${PORT}/dev/api-docs`);
-  }
-});
+    logger.debug(
+      `🌏 Express server started at http://localhost:${PORT} with ${process.env.NODE_ENV} environment variables`
+    );
+    if (process.env.NODE_ENV === 'dev') {
+      // This route is only present in development mode
+      logger.debug(
+        `⚙️  Swagger UI hosted at http://localhost:${PORT}/dev/api-docs`
+      );
+    }
+  });
 
 if (process.env.MONGO_URL == null) {
   logger.error('MONGO_URL not specified in environment');
   process.exit(1);
 } else {
-  safeMongooseConnection.connect(mongoUrl => {
+  safeMongooseConnection.connect((mongoUrl: string) => {
     logger.info(`Connected to MongoDB at ${mongoUrl}`);
     serve();
   });

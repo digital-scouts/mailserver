@@ -1,11 +1,14 @@
 import Connection, { Box, ImapFetch, ImapMessage } from 'imap';
 import logger from '../logger';
 import imapMails from '../env/mails.json';
+import { MailInputQueue } from './mailInputQueue';
+import { InboundMail } from '../models/inboundMail';
 
 const Imap = require('imap');
 const { inspect } = require('util');
+const { CronJob } = require('cron');
 
-export function startMailInboxListener() {
+function createImapConnection(): Array<Connection> {
   const connections: Array<Connection> = [];
   imapMails.forEach((mail: { user: string; password: string }) => {
     logger.debug(
@@ -21,58 +24,97 @@ export function startMailInboxListener() {
       })
     );
   });
+  return connections;
+}
 
-  function handleBox(openBoxErr: Error, box: Box, imap: Connection) {
-    logger.info('box ready');
-    if (openBoxErr) throw openBoxErr;
+function handleBox(
+  openBoxErr: Error,
+  box: Box,
+  imap: Connection,
+  queue: MailInputQueue
+) {
+  if (openBoxErr) throw openBoxErr;
 
-    const f: ImapFetch = imap.seq.fetch('0:3', {
-      bodies: 'HEADER.FIELDS (FROM TO SUBJECT DATE)',
-      struct: true
+  imap.search(['NEW'], (err: Error, results: Array<any>) => {
+    logger.debug(`${results.length} new mails ${inspect(results)}`);
+    if (err || !results.length) return imap.end();
+
+    let mail = new InboundMail();
+
+    const f = imap.fetch(results, {
+      bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)', 'TEXT']
     });
 
     f.on('message', (msg: ImapMessage, no: number) => {
-      logger.info(`Message ${no}`);
-      msg.on('body', (stream: any, info: any) => {
+      const prefix = `(${(imap as any)['_config'].user.split('@')[0]}-${no})`;
+      msg.on('body', (stream, info) => {
         let buffer = '';
         stream.on('data', (chunk: any) => {
           buffer += chunk.toString('utf8');
         });
         stream.once('end', () => {
-          logger.info(
-            `(${no}) Parsed header: ${inspect(Imap.parseHeader(buffer))}`
-          );
+          if (info.which !== 'TEXT') {
+            const header = Imap.parseHeader(buffer);
+            [mail.from] = header.from;
+            [mail.to] = (imap as any)['_config'].user.split('@');
+            [mail.date] = header.date;
+            [mail.subject] = header.subject;
+          } else {
+            mail.body = buffer;
+          }
         });
       });
-      msg.once('attributes', (attrs: any) => {
-        logger.info(`(${no}) Attributes: ${inspect(attrs, false, 8)}`);
-      });
       msg.once('end', () => {
-        logger.info(`(${no}) Finished`);
+        logger.debug(`${prefix}: ${inspect(mail)}`);
+        queue.enqueue(mail);
+        mail = new InboundMail();
+        imap.end();
       });
     });
-  }
-
-  connections.forEach((imap: Connection) => {
-    imap.once('ready', () => {
-      logger.info('imap ready');
-      imap.openBox('INBOX', true, (err: Error, box: Box) => {
-        handleBox(err, box, imap);
-      });
-    });
-
-    imap.once('alert', (alert: string) => {
-      logger.warn(`ALERT: ${alert}`);
-    });
-
-    imap.once('error', (err: Error) => {
-      logger.info(err);
-    });
-
-    imap.once('end', () => {
-      logger.debug('Connection ended');
-    });
-
-    imap.connect();
   });
+}
+
+function openConnection(imap: Connection, queue: MailInputQueue) {
+  const prefix = `(${(imap as any)['_config'].user.split('@')[0]})`;
+
+  imap.once('ready', () => {
+    logger.info(`${prefix} imap ready`);
+    imap.openBox('INBOX', true, (err: Error, box: Box) => {
+      handleBox(err, box, imap, queue);
+    });
+  });
+
+  imap.once('alert', (alert: string) => {
+    logger.warn(`${prefix} ALERT: ${alert}`);
+  });
+
+  imap.once('error', (err: Error) => {
+    logger.info(`${prefix} ERROR: ${err}`);
+  });
+
+  imap.once('end', () => {
+    logger.debug(`${prefix} Connection ended`);
+  });
+
+  imap.connect();
+}
+
+export function startMailInboxListener(queue: MailInputQueue) {
+  const connections: Array<Connection> = createImapConnection();
+
+  const job = new CronJob(
+    '*/1 * * * *',
+    () => {
+      connections.forEach((imap: Connection) => {
+        openConnection(imap, queue);
+      });
+      logger.info(`${queue.getItems().length} mails in queue`);
+    },
+    () => {
+      logger.info('Mail inbox listener stopped');
+      logger.info(`${queue.getItems().length} mails in queue`);
+    },
+    true,
+    'Europe/Berlin'
+  );
 }

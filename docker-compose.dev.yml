@@ -13,10 +13,9 @@ services:
       - "27017:27017"
 
   fake-smtp:
-    build: github.com/Nilhcem/FakeSMTP
-    image: fake-smtp
+    image: ghusta/fakesmtp:2.0
     volumes:
-      - '.tmp:/output'
+      - '.tmp:/var/mail'
     ports:
       - "250:25"
 

@@ -6,14 +6,12 @@ import logger from './logger';
 import * as init from './services/databaseLoaderService';
 import * as mailSender from './mail/sender';
 import * as mailReceiver from './mail/receiver';
-import { MailInputQueue } from './mail/mailInputQueue';
+import { startDistributorService } from './mail/distributorService';
 
 const result = dotenv.config();
 if (result.error) {
   dotenv.config({
-    path: `${__dirname}/env/.env.${
-      process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'
-    }`
+    path: `${__dirname}/env/.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`
   });
 }
 
@@ -76,14 +74,13 @@ const shutdown = () => {
 
 const serve = () =>
   app.listen(PORT, async () => {
-    const queue = new MailInputQueue();
-
     if (!(await mailSender.openConnection())) {
       logger.warn('Mail sender connection could not established -> SHUTDOWN');
       shutdown();
     }
 
-    mailReceiver.startMailInboxListener(queue);
+    mailReceiver.startMailInboxListener();
+    startDistributorService();
 
     logger.debug(
       `🌏 Express server started at http://localhost:${PORT} with ${process.env.NODE_ENV} environment variables`

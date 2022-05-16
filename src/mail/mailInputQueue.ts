@@ -1,19 +1,26 @@
-export class MailInputQueue {
-  items: any[];
+import { InboundMail } from "../models/inboundMail";
 
-  constructor(...params: any[]) {
+export class MailInputQueue {
+  items: Array<InboundMail>;
+  private static _instance: MailInputQueue;
+
+  constructor(...params: Array<InboundMail>) {
     this.items = [...params];
   }
 
-  enqueue(item: any) {
+  enqueue(item: InboundMail): void {
     this.items.push(item);
   }
 
-  dequeue() {
+  dequeue(): InboundMail {
     return this.items.shift();
   }
 
-  getItems() {
+  getItems(): Array<InboundMail> {
     return this.items;
+  }
+
+  public static get Instance(): MailInputQueue {
+    return this._instance || (this._instance = new this());
   }
 }

@@ -30,8 +30,7 @@ function createImapConnection(): Array<Connection> {
 function handleBox(
   openBoxErr: Error,
   box: Box,
-  imap: Connection,
-  queue: MailInputQueue
+  imap: Connection
 ) {
   if (openBoxErr) throw openBoxErr;
 
@@ -66,7 +65,7 @@ function handleBox(
       });
       msg.once('end', () => {
         logger.debug(`${prefix}: ${inspect(mail)}`);
-        queue.enqueue(mail);
+        MailInputQueue.Instance.enqueue(mail);
         mail = new InboundMail();
         imap.end();
       });
@@ -74,13 +73,13 @@ function handleBox(
   });
 }
 
-function openConnection(imap: Connection, queue: MailInputQueue) {
+function openConnection(imap: Connection) {
   const prefix = `(${(imap as any)['_config'].user.split('@')[0]})`;
 
   imap.once('ready', () => {
     logger.info(`${prefix} imap ready`);
     imap.openBox('INBOX', true, (err: Error, box: Box) => {
-      handleBox(err, box, imap, queue);
+      handleBox(err, box, imap);
     });
   });
 
@@ -99,21 +98,18 @@ function openConnection(imap: Connection, queue: MailInputQueue) {
   imap.connect();
 }
 
-export function startMailInboxListener(queue: MailInputQueue) {
+export function startMailInboxListener() {
   const connections: Array<Connection> = createImapConnection();
 
   const job = new CronJob(
     '*/1 * * * *',
     () => {
       connections.forEach((imap: Connection) => {
-        openConnection(imap, queue);
+        openConnection(imap);
       });
-      logger.info(`${queue.getItems().length} mails in queue`);
+      logger.info(`${MailInputQueue.Instance.getItems().length} mails in queue`);
     },
-    () => {
-      logger.info('Mail inbox listener stopped');
-      logger.info(`${queue.getItems().length} mails in queue`);
-    },
+    null,
     true,
     'Europe/Berlin'
   );

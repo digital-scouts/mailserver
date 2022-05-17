@@ -65,6 +65,6 @@ async function saveInsert(Mongo: any, element: any) {
 }
 
 export async function databaseLoaderService() {
-  distributorData.map((i) => saveInsert(Distributor, i));
-  serviceMailData.map((i) => saveInsert(ServiceMail, i));
+  distributorData.map(i => saveInsert(Distributor, i));
+  serviceMailData.map(i => saveInsert(ServiceMail, i));
 }

@@ -1,41 +1,48 @@
-import { Model, Schema, model } from 'mongoose';
-import * as mongoose from 'mongoose';
-import TimeStampPlugin, { ITimeStampedDocument } from './plugins/timestamp-plugin';
+import { Model, Schema, model, Document } from 'mongoose';
 import { IDistributor } from './distriburor';
 
-export interface IUser extends ITimeStampedDocument {
+export interface IUser extends Document {
   _id?: string;
   name: string;
   email: string;
-  subscribedDistributors: Array<{ _id?: string, distributor: IDistributor, confirmed: boolean }>;
+  subscribedDistributors: Array<{
+    _id?: string;
+    distributor: IDistributor;
+    confirmed: boolean;
+  }>;
   allowedDistributors: Array<IDistributor>;
 }
 
-interface IUserModel extends Model<IUser> {
-}
+interface IUserModel extends Model<IUser> {}
 
-const schema = new Schema<IUser>({
-  name: { type: String },
-  email: {
-    type: String,
-    unique: true,
-    required: true
-  },
-  subscribedDistributors: [{
-    distributor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Distributor'
+const schema = new Schema<IUser>(
+  {
+    name: { type: String },
+    email: {
+      type: String,
+      unique: true,
+      required: true
     },
-    confirmed: Boolean
-  }],
-  allowedDistributors: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Distributor'
-  }]
-});
-
-// Add timestamp plugin for createdAt and updatedAt in miliseconds from epoch
-schema.plugin(TimeStampPlugin);
+    subscribedDistributors: [
+      {
+        distributor: {
+          type: Schema.Types.ObjectId,
+          ref: 'Distributor'
+        },
+        confirmed: Boolean
+      }
+    ],
+    allowedDistributors: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Distributor'
+      }
+    ]
+  },
+  {
+    timestamps: true
+  }
+);
 
 const User: IUserModel = model<IUser, IUserModel>('User', schema);
 

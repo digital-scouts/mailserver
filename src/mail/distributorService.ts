@@ -101,11 +101,15 @@ export function startDistributorService(): void {
         mails.forEach((mail: IMail) => {
           if (mail.isAnswer) {
             sendMailAsAnswer(mail);
+            mail.send = true;
+            mail.save();
             return;
           }
 
           if (!mail.distributor.sendRestricted || mail.senderHasPermission) {
             sendToAllMembers(mail, mail.distributor);
+            mail.send = true;
+            mail.save();
             return;
           }
           sendToAdmins(mail, mail.distributor);

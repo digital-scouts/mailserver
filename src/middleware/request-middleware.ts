@@ -9,8 +9,8 @@ const getMessageFromJoiError = (error: Joi.ValidationError): string | undefined 
   if (!error.details && error.message) {
     return error.message;
   }
-  return error.details && error.details.length > 0 && error.details[0].message
-    ? `PATH: [${error.details[0].path}] ;; MESSAGE: ${error.details[0].message}` : undefined;
+  return error.details && error.details.length > 0 && error.details[0].message ?
+    `PATH: [${error.details[0].path}] ;; MESSAGE: ${error.details[0].message}` : undefined;
 };
 
 interface HandlerOptions {

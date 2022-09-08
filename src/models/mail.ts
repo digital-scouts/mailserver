@@ -1,5 +1,7 @@
 import { Model, Schema, model, Document } from 'mongoose';
 import { IDistributor } from './distriburor';
+import logger from '../logger';
+import User, { IUser } from './user';
 
 export interface IMail extends Document {
   _id: string;
@@ -10,8 +12,10 @@ export interface IMail extends Document {
   from: string;
   distributor: IDistributor;
   isAnswer: boolean;
-  adminOnly: boolean;
+  senderHasPermission: boolean;
   send: boolean;
+  setIsAnswer: Function;
+  setHasPermission: Function;
 }
 
 interface IMailModel extends Model<IMail> {}
@@ -46,7 +50,7 @@ const schema = new Schema<IMail>(
     isAnswer: {
       type: Boolean
     },
-    adminOnly: {
+    senderHasPermission: {
       type: Boolean
     },
     send: {
@@ -60,6 +64,40 @@ const schema = new Schema<IMail>(
 );
 
 schema.index({ mailId: 1, distributor: 1 }, { unique: true });
+
+/**
+ * Determine if the mail is a answer to a previous email
+ */
+schema.methods.setIsAnswer = function () {
+  logger.debug(
+    `(${this.mailId}) isAnswer: ${this.subject.toLowerCase().includes('re:')}`
+  );
+  this.isAnswer = this.subject.toLowerCase().includes('re:');
+};
+
+/**
+ * check if sender is allowed to send mail to distributor
+ */
+schema.methods.setHasPermission = async function () {
+  const user: IUser = await User.findOne({ email: this.from }).exec();
+
+  if (!user) {
+    logger.warn('Send mail failed. Sender not found');
+    this.senderHasPermission = false;
+  }
+
+  const allowed = user.allowedDistributors.find(
+    (d: IDistributor) => d._id.toString() === this.distributor.id
+  );
+  logger.debug(`isAllowed: ${allowed !== undefined}`);
+  this.senderHasPermission = allowed !== undefined;
+};
+
+schema.pre('save', async function (next) {
+  this.setIsAnswer();
+  await this.setHasPermission();
+  next();
+});
 
 const Mail: IMailModel = model<IMail, IMailModel>('Mail', schema);
 

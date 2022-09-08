@@ -1,4 +1,5 @@
 import * as nodemailer from 'nodemailer';
+import { IDistributor } from '../models/distriburor';
 import logger from '../logger';
 
 const { htmlToText } = require('nodemailer-html-to-text');
@@ -36,8 +37,13 @@ export function openConnection() {
   });
 }
 
-// eslint-disable-next-line max-len
-export function sendDistributorEmail(from: string, to: Array<{ name: string, address: string }>, subject: string, text: string, distributor: string): void {
+export function sendDistributorEmail(
+  from: string,
+  to: Array<{ name: string; address: string }>,
+  subject: string,
+  text: string,
+  distributor: IDistributor
+): void {
   if (transporter === null) {
     logger.warn('Could not send mail. No connection');
     return;
@@ -50,44 +56,48 @@ export function sendDistributorEmail(from: string, to: Array<{ name: string, add
   });
 
   to.forEach(receiver => {
-    const unsubscribeLink = `${process.env.HOST}/unsubscribe?dis=${distributor}&sub=${receiver.address}`;
-    email.send({
-      template: path.join(__dirname, 'emails', 'default'),
-      message: {
-        from: {
-          name: 'Pfadfinder Verteiler',
-          address: 'info@jannecklange.de'
+    const unsubscribeLink = `${process.env.HOST}/unsubscribe?dis=${distributor.name}&sub=${receiver.address}`;
+    email
+      .send({
+        template: path.join(__dirname, 'emails', 'default'),
+        message: {
+          from: {
+            name: 'Pfadfinder Verteiler',
+            address: 'info@jannecklange.de'
+          },
+          to: receiver,
+          replyTo: from,
+          list: {
+            unsubscribe: unsubscribeLink
+          }
         },
-        to: receiver,
-        replyTo: from,
-        list: {
-          unsubscribe: unsubscribeLink
+        locals: {
+          name: receiver.name,
+          mail: receiver.address,
+          subject,
+          text,
+          distributor: distributor.name,
+          unsubscribeLink
         }
-      },
-      locals: {
-        name: receiver.name,
-        mail: receiver.address,
-        subject,
-        text,
-        distributor,
-        unsubscribeLink
-      }
-    })
+      })
       .then(() => logger.info('email has been send!'))
       .catch(logger.error);
   });
 }
 
 export function sendMail(to: string, subject: string, text: string) {
-  transporter.sendMail({
-    from: 'info@jannecklange.de',
-    to,
-    subject,
-    text
-  }, (error, info) => {
-    if (error) {
-      logger.error(`error: ${error}`);
+  transporter.sendMail(
+    {
+      from: 'info@jannecklange.de',
+      to,
+      subject,
+      text
+    },
+    (error, info) => {
+      if (error) {
+        logger.error(`error: ${error}`);
+      }
+      logger.info(`Message Sent ${info.response}`);
     }
-    logger.info(`Message Sent ${info.response}`);
-  });
+  );
 }

@@ -2,11 +2,10 @@ import { Router } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
 import apiSpec from '../openapi.json';
-import * as receiver from './mail/receiver';
 import logger from './logger';
 import * as subscriptionService from './services/subscriptionService';
 import * as serviceMailService from './mail/serviceMailService';
-import Distributor, { IDistributor } from './models/distriburor';
+import Distributor from './models/distriburor';
 import User, { IUser } from './models/user';
 
 const swaggerUiOptions = {
@@ -18,7 +17,7 @@ const router = Router();
  * get subscribe view
  */
 router.get('/subscribe', (req, res) => {
-  res.sendFile(path.join(`${__dirname}/views/subscribe.html`));
+  res.sendFile(path.join(`${__dirname}/views/subscribe/subscribe.html`));
 });
 
 /**
@@ -70,8 +69,7 @@ router.get('/confirm', (req, res) => {
       res.sendStatus(200);
     },
     (error: Error) => {
-      logger.warn('Subscriber confirmation failed:');
-      logger.warn(error);
+      logger.warn(`Subscriber confirmation failed: ${error.message}`);
       res.status(400).send('Subscriber confirmation failed');
     }
   );

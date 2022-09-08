@@ -3,7 +3,7 @@ import logger from '../logger';
 import User, { IUser } from '../models/user';
 import * as MailSender from './sender';
 import Distributor, { IDistributor } from '../models/distriburor';
-import { IMail } from '../models/mail';
+import Mail, { IMail } from '../models/mail';
 
 const { CronJob } = require('cron');
 
@@ -56,53 +56,28 @@ async function getRecipients(
   );
 }
 
-/**
- * Determine if the mail is a answer to a previous email
- */
-function isAnswer(mail: IMail): boolean {
-  logger.debug(`isAnswer: ${mail.subject.toLowerCase().includes('re:')}`);
-  return mail.subject.toLowerCase().includes('re:');
-}
-
-/**
- * Determine if distributor is restricted to send
- */
-function isPublic(distributor: IDistributor): boolean {
-  logger.debug(`isPublic: ${!distributor.sendRestricted}`);
-  return !distributor.sendRestricted;
-}
-
-/**
- * check if sender is allowed to send mail to distributor
- */
-async function isAllowed(
-  sender: string,
-  distributor: IDistributor
-): Promise<boolean> {
-  const user: IUser = await User.findOne({ email: sender }).exec();
-
-  if (!user) {
-    logger.warn('Send mail failed. Sender not found');
-    return false;
-  }
-
-  const allowed = user.allowedDistributors.find(
-    (d: IDistributor) => d._id.toString() === distributor.id
-  );
-  logger.debug(`isAllowed: ${allowed !== undefined}`);
-  return allowed !== undefined;
-}
-
 async function sendToAllMembers(mail: IMail, distibutor: IDistributor) {
   const recipients = await getRecipients(distibutor);
-  // MailSender.sendDistributorEmail(mail.from, recipients, mail.subject, mail.body, mail.to);
+  MailSender.sendDistributorEmail(
+    mail.from,
+    recipients,
+    mail.subject,
+    mail.body,
+    mail.distributor
+  );
   logger.debug(`Send mail to all members: ${inspect(recipients)}`);
 }
 
 async function sendToAdmins(mail: IMail, distibutor: IDistributor) {
   const admins = await getAdmins(distibutor);
   logger.debug(`Send mail to admins: ${inspect(admins)}`);
-  // MailSender.sendDistributorEmail(mail.from, admins, mail.subject, mail.body, mail.to);
+  MailSender.sendDistributorEmail(
+    mail.from,
+    admins,
+    mail.subject,
+    mail.body,
+    mail.distributor
+  );
 }
 
 async function sendMailAsAnswer(mail: IMail) {
@@ -113,31 +88,33 @@ async function sendMailAsAnswer(mail: IMail) {
   // todo send
 }
 
-async function distributeMail(mail: IMail) {
-  if (isAnswer(mail)) {
-    sendMailAsAnswer(mail);
-    return;
-  }
-
-  if (
-    isPublic(mail.distributor) ||
-    (await isAllowed(mail.from, mail.distributor))
-  ) {
-    sendToAllMembers(mail, mail.distributor);
-    return;
-  }
-
-  sendToAdmins(mail, mail.distributor);
-}
-
 export function startDistributorService(): void {
-  logger.info('startDistributorService');
-
   const job = new CronJob(
-    '*/10 * * * *',
+    '*/1 * * * *',
     () => {
       // start distibutor 5 second after cron job to give imap reciever time to start
-      setTimeout(() => {}, 5000);
+      setTimeout(async () => {
+        const mails: Array<IMail> = await Mail.find({ send: false })
+          .populate('distributor')
+          .exec();
+
+        mails.forEach((mail: IMail) => {
+          if (mail.isAnswer) {
+            sendMailAsAnswer(mail);
+            return;
+          }
+
+          if (!mail.distributor.sendRestricted || mail.senderHasPermission) {
+            sendToAllMembers(mail, mail.distributor);
+            return;
+          }
+          sendToAdmins(mail, mail.distributor);
+
+          mail.send = true;
+          mail.save();
+        });
+        logger.debug(`Found ${mails.length} mails to send: ${inspect(mails)}`);
+      }, 5000);
     },
     null,
     true,

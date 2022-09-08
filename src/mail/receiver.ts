@@ -50,7 +50,7 @@ function handleBox(
 ) {
   if (openBoxErr) throw openBoxErr;
 
-  imap.search(['ALL'], (err: Error, results: Array<any>) => {
+  imap.search(['NEW'], (err: Error, results: Array<any>) => {
     logger.debug(`${results.length} new mails ${inspect(results)}`);
     if (err || !results.length) {
       imap.end();

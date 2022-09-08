@@ -42,7 +42,7 @@ To edit environment variables, create a file with name `.env` and copy the conte
 * Administrative Oberfläche
   * [ ] Absender zulassen (ID des Verteilers im User eintragen)
   * [ ] Verteiler hinzufügen
-  * [ ] Absender entfernen (ID des Verteilers im User entfernen)
+  * [ ] Absender entfernen
   * [ ] Empfänger einsehen
 
 ### Spätere Aufgaben

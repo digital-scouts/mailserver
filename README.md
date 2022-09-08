@@ -36,10 +36,14 @@ To edit environment variables, create a file with name `.env` and copy the conte
 
 ### MVP
 
-* [ ] Senden an mehrere Verteiler gleichzeitig
-* [ ] Vom Verteiler abmelden / Einstellungen ändern
 * [X] Am Verteiler mittels Opt-In anmelden
-* [ ] Administrative Oberfläche (Nutzer einsehen / Sender zulassen)
+* [X] Senden an mehrere Verteiler gleichzeitig
+* [ ] Verteiler Einstellungen ändern (Von bestehenden abmelden, neue anmelden)
+* [ ] Administrative Oberfläche
+  * [ ] Absender zulassen (ID des Verteilers im User eintragen)
+  * [ ] Verteiler hinzufügen
+  * [ ] Absender entfernen (ID des Verteilers im User entfernen)
+  * [ ] Empfänger einsehen
 
 ### Spätere Aufgaben
 

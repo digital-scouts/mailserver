@@ -4,7 +4,7 @@ on:
     branches: [ master ]
 
 env:
-  REGISTRY: docker.io
+  REGISTRY: hub.docker.com
   IMAGE_NAME: sapza/mailserver
 
 jobs:

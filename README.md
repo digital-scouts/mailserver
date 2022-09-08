@@ -39,7 +39,7 @@ To edit environment variables, create a file with name `.env` and copy the conte
 * [X] Am Verteiler mittels Opt-In anmelden
 * [X] Senden an mehrere Verteiler gleichzeitig
 * [ ] Verteiler Einstellungen ändern (Von bestehenden abmelden, neue anmelden)
-* [ ] Administrative Oberfläche
+* Administrative Oberfläche
   * [ ] Absender zulassen (ID des Verteilers im User eintragen)
   * [ ] Verteiler hinzufügen
   * [ ] Absender entfernen (ID des Verteilers im User entfernen)

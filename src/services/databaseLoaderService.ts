@@ -3,6 +3,7 @@ import ServiceMail from '../models/serviceMails';
 
 const distributorData = [
   {
+    index: 1,
     name: 'Wölflinge',
     description:
       'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Wölflingsmeute.',
@@ -11,6 +12,7 @@ const distributorData = [
     subscribeRestricted: false
   },
   {
+    index: 2,
     name: 'Jungpfadfinder',
     description:
       'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Jungpfadfindersippe.',
@@ -19,6 +21,7 @@ const distributorData = [
     subscribeRestricted: false
   },
   {
+    index: 3,
     name: 'Pfadfinder',
     description:
       'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Pfadfindersippe.',
@@ -27,6 +30,7 @@ const distributorData = [
     subscribeRestricted: false
   },
   {
+    index: 4,
     name: 'Rover',
     description:
       'Verteiler für Neuigkeiten zu Gruppenstunden und Veranstaltungen deiner Roverrunde.',
@@ -35,6 +39,7 @@ const distributorData = [
     subscribeRestricted: false
   },
   {
+    index: 5,
     name: 'Ehemalige',
     description:
       'Verteiler für Neuigkeiten und Veranstaltungen für Ehemalige Mitglieder und Interessierte.',
@@ -43,6 +48,7 @@ const distributorData = [
     subscribeRestricted: false
   },
   {
+    index: 6,
     name: 'Leiterrunde',
     description:
       'Verteiler für Neuigkeiten und Informationsaustausch innerhalb der Leiterrunde. Dieser Verteiler benötigt eine Freischaltung durch einen Admin.',

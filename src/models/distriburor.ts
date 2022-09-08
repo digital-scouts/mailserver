@@ -1,8 +1,10 @@
+import { number } from '@hapi/joi';
 import { Model, Schema, model, Document } from 'mongoose';
 import { IUser } from './user';
 
 export interface IDistributor extends Document {
   _id: string;
+  index: number;
   name: string;
   description: string;
   mailPrefix: string;
@@ -15,6 +17,11 @@ interface IDistributorModel extends Model<IDistributor> {}
 
 const schema = new Schema<IDistributor>(
   {
+    index: {
+      unique: true,
+      type: Number,
+      required: true
+    },
     name: {
       unique: true,
       type: String,

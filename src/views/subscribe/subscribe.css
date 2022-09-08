@@ -111,7 +111,18 @@ html, body {
   transition: 1.5s;
   transition-delay: 1s;
   z-index: 350;
+  background-color: whitesmoke;
+  border-radius: 15px;
+  background: url(paper.gif);
+  background-position: left top;
+  background-repeat: repeat;
 }
+
+#subscribeForm {
+margin: 8px;
+}
+
+
 
 #name, #email, #send, .checkboxElement {
   margin: 0 0 5px 0;
@@ -125,6 +136,9 @@ html, body {
   border-bottom: 1px solid #bdbdbd;
   letter-spacing: normal;
   background-color: white;
+}
+#name{
+  margin-top: 10px;
 }
 
 #checkbox-list {

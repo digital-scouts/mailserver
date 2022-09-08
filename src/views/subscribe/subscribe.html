@@ -68,8 +68,7 @@
           }
         });
         let distributors = await response.json();
-        distributors = distributors.sort((a, b) => a.index - b.index);
-        console.log(distributors); //extract JSON from the http response
+        distributors = distributors.sort((a, b) => a.index - b.index); //extract JSON from the http response
 
         for (const checkboxDataKey of distributors) {
           const label = document.createElement('label');

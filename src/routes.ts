@@ -37,6 +37,7 @@ router.post('/subscribe', async (req, res) => {
     !(await serviceMailService.handleNewSubscription(
       req.body.email,
       req.body.name,
+      req.body.nameKind,
       req.body.distributor
     ))
   ) {

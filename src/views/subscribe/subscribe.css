@@ -124,7 +124,7 @@ margin: 8px;
 
 
 
-#name, #email, #send, .checkboxElement {
+#name, #email, #nameKind, #send, .checkboxElement {
   margin: 0 0 5px 0;
   padding: 0 0 0 10px;
   height: 40px;

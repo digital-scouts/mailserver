@@ -4,6 +4,7 @@ import { IDistributor } from './distriburor';
 export interface IUser extends Document {
   _id?: string;
   name: string;
+  nameKind: string;
   email: string;
   subscribedDistributors: Array<{
     _id?: string;
@@ -17,7 +18,11 @@ interface IUserModel extends Model<IUser> {}
 
 const schema = new Schema<IUser>(
   {
-    name: { type: String },
+    name: {
+      type: String,
+      required: true
+    },
+    nameKind: { type: String },
     email: {
       type: String,
       unique: true,

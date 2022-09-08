@@ -21,6 +21,7 @@ export function handleNewServiceMail(
 export async function handleNewSubscription(
   email: string,
   name: string,
+  nameKind: string,
   targetDistributorEmails: string[]
 ): Promise<boolean> {
   let user = await User.findOne({ email }).exec();

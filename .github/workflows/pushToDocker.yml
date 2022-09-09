@@ -1,4 +1,4 @@
-name: Publish latest image
+name: Build Docker Image
 on:
   push:
     branches: [ master ]

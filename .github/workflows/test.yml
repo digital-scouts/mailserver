@@ -1,0 +1,26 @@
+name: Build Docker Image
+on:
+  push:
+    branches: [master]
+    tags: ['v*.**']
+  pull_request:
+    branches: [master]
+
+env:
+  REGISTRY: hub.docker.com/repository/docker
+  IMAGE_NAME: sapza/mailserver
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+#      - run: npm test

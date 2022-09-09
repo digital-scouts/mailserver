@@ -1,7 +1,10 @@
 name: Build Docker Image
 on:
   push:
-    branches: [ master ]
+    branches: [master]
+    tags: ['v*.**']
+  pull_request:
+    branches: [master]
 
 env:
   REGISTRY: hub.docker.com/repository/docker

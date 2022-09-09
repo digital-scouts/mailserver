@@ -4,7 +4,7 @@ on:
     branches: [ master ]
 
 env:
-  REGISTRY: https://hub.docker.com/repository/docker
+  REGISTRY: hub.docker.com/repository/docker
   IMAGE_NAME: sapza/mailserver
 
 jobs:
@@ -24,21 +24,10 @@ jobs:
         with:
           username: sapza
           password: dckr_pat_yljPTptqZzfVS5Y6gdZ2uIt5c2k
-      
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=true
-            prefix=
-            suffix=
             
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ env.IMAGE_NAME }}:latest

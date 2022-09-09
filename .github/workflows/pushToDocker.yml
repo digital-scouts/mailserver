@@ -21,13 +21,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        
+
       - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v2
         with:
           username: sapza
           password: ${{ secrets.DOCKER_SECRET }}
-          
+
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v4
@@ -37,7 +38,14 @@ jobs:
             latest=true
             prefix=
             suffix=
-            
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - run: npm test
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:

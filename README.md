@@ -1,3 +1,5 @@
+[![Docker Image](https://github.com/JanneckLange/mailserver/actions/workflows/pushToDocker.yml/badge.svg?branch=master)](https://hub.docker.com/repository/docker/sapza/mailserver)
+
 # Mailserver
 
 Dieser Mail-Server ist zur einfachen Weiterleitung von E-Mails an Opt-In Nutzer gedacht.

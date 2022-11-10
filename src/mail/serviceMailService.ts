@@ -23,7 +23,7 @@ export async function handleNewSubscription(
   name: string,
   nameKind: string,
   targetDistributorEmails: string[]
-): Promise<boolean> {
+): Promise<string[]> {
   let user = await User.findOne({ email }).exec();
   if (!user) {
     logger.info('new User');
@@ -43,43 +43,31 @@ export async function handleNewSubscription(
   logger.debug(JSON.stringify({ targetDistributorEmails }));
 
   // update subscribedDistributors | override but keep confirmation
-  user.subscribedDistributors = await Promise.all(
-    targetDistributorEmails.map(async (targetDistributorEmail: string) => {
-      const dbDistributor = await Distributor.findOne({
-        mailPrefix: targetDistributorEmail
-      });
-      const userDistributor = user.subscribedDistributors.find(
-        (d: { _id?: string; distributor: IDistributor; confirmed: boolean }) =>
-          d.distributor.mailPrefix === dbDistributor.mailPrefix
-      );
-      return {
-        distributor: dbDistributor,
-        confirmed: userDistributor?.confirmed || false
-      };
-    })
+  const dbDistributors = await Promise.all(
+    targetDistributorEmails.map(async targetDistributorEmail =>
+      Distributor.findOne({ mailPrefix: targetDistributorEmail })
+    )
   );
 
-  logger.info(JSON.stringify(user.subscribedDistributors));
   try {
     await user.save();
   } catch (e) {
-    return false;
+    return null;
   }
 
-  user.subscribedDistributors.forEach(
-    (s: { _id?: string; distributor: IDistributor; confirmed: boolean }) => {
-      if (!s.confirmed) {
-        const confirmLink = `${
-          process.env.HOST
-        }/confirm?id=${s._id.toString()}`;
-        sender.sendMail(
-          email,
-          `Confirm your Subscription to ${s.distributor.mailPrefix}`,
-          `Klicke <a href='${confirmLink}'>hier</a> um die Änderung am Newsletter zu bestätigen.`
-        );
-      }
-    }
-  );
+  const confirmationLink: string[] = [];
 
-  return true;
+  dbDistributors.forEach(dist => {
+    const confirmLink = `${
+      process.env.HOST
+    }/confirm?user=${user._id.toString()}&distributor=${dist._id.toString()}`;
+    confirmationLink.push(confirmLink);
+    sender.sendMail(
+      email,
+      `Confirm your Subscription to ${dist.mailPrefix}`,
+      `Klicke <a href='${confirmLink}'>hier</a> um die Änderung am Newsletter zu bestätigen.`
+    );
+  });
+
+  return confirmationLink;
 }

@@ -11,6 +11,7 @@
   },
   "rules": {
     "operator-linebreak": ["warn", "after"],
+    "function-paren-newline": "off",
     "object-curly-newline": "off",
     "no-param-reassign": "off",
     "implicit-arrow-linebreak": "off",

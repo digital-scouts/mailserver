@@ -9,7 +9,6 @@ export interface IUser extends Document {
   subscribedDistributors: Array<{
     _id?: string;
     distributor: IDistributor;
-    confirmed: boolean;
   }>;
   allowedDistributors: Array<IDistributor>;
 }
@@ -33,8 +32,7 @@ const schema = new Schema<IUser>(
         distributor: {
           type: Schema.Types.ObjectId,
           ref: 'Distributor'
-        },
-        confirmed: Boolean
+        }
       }
     ],
     allowedDistributors: [

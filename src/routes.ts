@@ -3,9 +3,8 @@ import swaggerUi from 'swagger-ui-express';
 import path from 'path';
 import apiSpec from '../openapi.json';
 import logger from './logger';
-import * as subscriptionService from './services/subscriptionService';
 import * as serviceMailService from './mail/serviceMailService';
-import Distributor from './models/distriburor';
+import Distributor, { IDistributor } from './models/distriburor';
 import User, { IUser } from './models/user';
 
 const swaggerUiOptions = {
@@ -33,14 +32,14 @@ router.post('/subscribe', async (req, res) => {
   if (typeof req.body.distributor === 'string') {
     req.body.distributor = [req.body.distributor];
   }
-  if (
-    !(await serviceMailService.handleNewSubscription(
+  const confirmationLink: string[] =
+    await serviceMailService.handleNewSubscription(
       req.body.email,
       req.body.name,
       req.body.nameKind,
       req.body.distributor
-    ))
-  ) {
+    );
+  if (!confirmationLink) {
     res
       .status(400)
       .send(
@@ -48,32 +47,31 @@ router.post('/subscribe', async (req, res) => {
       );
     return;
   }
-  res.sendStatus(200);
+  logger.debug(confirmationLink);
+  res.status(200).send(confirmationLink);
 });
 
 /**
  * confirm subscription to be able to receive emails from distributor
  */
-router.get('/confirm', (req, res) => {
+router.get('/confirm', async (req, res) => {
   logger.debug(JSON.stringify(req.query));
-  if (!req.query || !req.query.id) {
-    res.status(400).send('ID missing in query');
+  if (!req.query || !req.query.user || !req.query.distributor) {
+    res.status(400).send('User or distributor missing in query');
     return;
   }
-  subscriptionService.confirmDistributor(req.query.id as string).then(
-    (r: IUser) => {
-      if (r === null) {
-        res.status(400).send('Subscriber confirmation failed');
-        return;
-      }
-      logger.info(`Subscriber confirmed ${r.name}`);
-      res.sendStatus(200);
-    },
-    (error: Error) => {
-      logger.warn(`Subscriber confirmation failed: ${error.message}`);
-      res.status(400).send('Subscriber confirmation failed');
-    }
+  const user: IUser = await User.findById(req.query.user);
+  const distributor: IDistributor = await Distributor.findById(
+    req.query.distributor
   );
+  if (!user || !distributor) {
+    res.status(400).send('Subscriber confirmation failed');
+    return;
+  }
+  user.subscribedDistributors.push({ distributor });
+  user.save();
+  logger.info(`Subscriber confirmed ${user.name}`);
+  res.sendStatus(200);
 
   // todo return html file
 });
@@ -87,6 +85,7 @@ router.get('/unsubscribe', (req, res) => {
     res.status(400).send('dis or sub missing in query');
     return;
   }
+  // todo implement unsubscribe
   res.sendStatus(501);
 });
 

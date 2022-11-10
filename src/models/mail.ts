@@ -84,6 +84,7 @@ schema.methods.setHasPermission = async function () {
   if (!user) {
     logger.warn('Send mail failed. Sender not found');
     this.senderHasPermission = false;
+    return;
   }
 
   const allowed = user.allowedDistributors.find(

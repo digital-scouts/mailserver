@@ -73,23 +73,34 @@ router.get('/confirm', async (req, res) => {
   logger.info(`Subscriber confirmed ${user.name}`);
   res.sendStatus(200);
 
+  // todo send confirmation mail
   // todo return html file
 });
 
 /**
  * unsubscribe from distributor
  */
-router.get('/unsubscribe', (req, res) => {
+router.get('/unsubscribe', async (req, res) => {
   logger.debug(JSON.stringify(req.query));
-  if (!req.query || !req.query.dis || !req.query.sub) {
-    res.status(400).send('dis or sub missing in query');
+  if (!req.query || !req.query.user || !req.query.distributor) {
+    res.status(400).send('User or distributor missing in query');
     return;
   }
-  // todo implement unsubscribe
-  res.sendStatus(501);
-});
+  const user: IUser = await User.findById(req.query.user);
+  if (!user) {
+    res.status(400).send('User did not exist');
+    return;
+  }
 
-// todo login
+  user.subscribedDistributors = user.subscribedDistributors.filter(
+    dist =>
+      dist.distributor._id.toString() !== (req.query.distributor as string)
+  );
+  user.save();
+  res.sendStatus(200);
+
+  // todo send confirmation mail
+});
 
 router.get('/api/users', async (req, res) => {
   res.json(await User.find().exec()).status(200);

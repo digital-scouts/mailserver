@@ -6,6 +6,7 @@
 * Wenn der Verteiler geschlossenen und der Absender nicht freigeschaltet ist wird die Nachricht an die Sub-Administratoren weitergeleitet.
 * Der Absender kann an mehrere Verteiler gleichzeitig schreiben. Ist ein Empfänger in mehreren Verteilern, erhält dieser mehrere Mails.
 * Wenn eine Mail nicht zugestellt werden kann, wird der Absender benachrichtigt.
+  * Muss noch geprüft werden, was für Fälle von 'Zustellung nicht möglich' existieren und abgefangen werden können.
 * Die Adresse des Absenders bleibt verborgen und kann vom Empfänger nicht gesehen werden.
 
 ## Empfänger

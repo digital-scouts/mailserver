@@ -108,6 +108,7 @@ function handleBox(
 function openConnection(imap: Connection, dis: IDistributor) {
   const prefix = `(${(imap as any)['_config'].user.split('@')[0]})`;
 
+  // todo fix (node:20) MaxListenersExceededWarning: Possible EventEmitter memory leak detected.
   imap.once('ready', () => {
     logger.info(`${prefix} imap ready`);
     imap.openBox('INBOX', true, (err: Error, box: Box) => {

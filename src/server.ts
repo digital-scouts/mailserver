@@ -11,7 +11,9 @@ import { startDistributorService } from './mail/distributorService';
 const result = dotenv.config();
 if (result.error) {
   dotenv.config({
-    path: `${__dirname}/env/.env.${process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'}`
+    path: `${__dirname}/env/.env.${
+      process.env.NODE_ENV ? process.env.NODE_ENV : 'dev'
+    }`
   });
 }
 

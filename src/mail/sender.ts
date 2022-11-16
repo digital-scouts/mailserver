@@ -1,19 +1,20 @@
 import * as nodemailer from 'nodemailer';
+import SMTPPool from 'nodemailer/lib/smtp-pool';
+import path from 'path';
 import { IDistributor } from '../models/distriburor';
 import logger from '../logger';
 
 const { htmlToText } = require('nodemailer-html-to-text');
 const Email = require('email-templates');
-const path = require('path');
 
-let transporter: import('nodemailer/lib/mailer') = null;
+let transporter: nodemailer.Transporter<SMTPPool.SentMessageInfo> = null;
 
 export function openConnection() {
   transporter = nodemailer.createTransport({
     pool: true,
     host: process.env.MAIL_HOST,
     port: +process.env.MAIL_PORT,
-    secure: false,
+    secure: process.env.MAIL_HOST !== 'localhost',
     auth: {
       user: process.env.MAIL_USER,
       pass: process.env.MAIL_PASS

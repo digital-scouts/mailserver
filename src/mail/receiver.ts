@@ -1,12 +1,12 @@
 import Connection, { Box, ImapFetch, ImapMessage } from 'imap';
+import { CronJob } from 'cron';
+import { inspect } from 'util';
 import logger from '../logger';
 import imapMails from '../env/mails.json';
 import Mail from '../models/mail';
 import Distributor, { IDistributor } from '../models/distriburor';
 
 const Imap = require('imap');
-const { inspect } = require('util');
-const { CronJob } = require('cron');
 
 function createImapConnection() {
   const connections: Array<{ con: Connection; dis: IDistributor }> = [];

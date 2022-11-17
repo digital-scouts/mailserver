@@ -71,10 +71,11 @@ router.get('/confirm', async (req, res) => {
   user.subscribedDistributors.push({ distributor });
   user.save();
   logger.info(`Subscriber confirmed ${user.name}`);
-  res.sendStatus(200);
+  res
+    .status(200)
+    .sendFile(path.join(`${__dirname}/views/confirm/confirm.html`));
 
   // todo send confirmation mail
-  // todo return html file
 });
 
 /**
@@ -97,7 +98,9 @@ router.get('/unsubscribe', async (req, res) => {
       dist.distributor._id.toString() !== (req.query.distributor as string)
   );
   user.save();
-  res.sendStatus(200);
+  res
+    .status(200)
+    .sendFile(path.join(`${__dirname}/views/unsubscribe/unsubscribe.html`));
 
   // todo send confirmation mail
 });

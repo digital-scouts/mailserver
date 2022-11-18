@@ -70,12 +70,12 @@ router.get('/confirm', async (req, res) => {
   }
   user.subscribedDistributors.push({ distributor });
   user.save();
-  logger.info(`Subscriber confirmed ${user.name}`);
+  logger.info(`Subscriber confirmed ${user.name} ${user.email}`);
   res
     .status(200)
     .sendFile(path.join(`${__dirname}/views/confirm/confirm.html`));
 
-  // todo send confirmation mail
+  serviceMailService.handleSubscriptionConfirmed(user, distributor);
 });
 
 /**

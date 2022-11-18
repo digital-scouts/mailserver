@@ -1,4 +1,4 @@
-import User from '../models/user';
+import User, { IUser } from '../models/user';
 import * as sender from './sender';
 import logger from '../logger';
 import Distributor, { IDistributor } from '../models/distriburor';
@@ -10,6 +10,18 @@ export function handleNewServiceMail(
   text: string
 ) {
   logger.debug('handleNewServiceMail');
+}
+
+export async function handleSubscriptionConfirmed(
+  user: IUser,
+  distributor: IDistributor
+): Promise<void> {
+  sender.sendMail(
+    user.email,
+    'Erfolgreich angemeldet.',
+    `Hallo ${user.name}, \n` +
+      `du hast dich Erfolgreich am ${distributor.name}-Verteiler angemeldet.`
+  );
 }
 
 /**
@@ -30,6 +42,7 @@ export async function handleNewSubscription(
     user = new User({
       email,
       name,
+      nameKind,
       subscribedDistributors: []
     });
   }
@@ -64,8 +77,8 @@ export async function handleNewSubscription(
     confirmationLink.push(confirmLink);
     sender.sendMail(
       email,
-      `Confirm your Subscription to ${dist.mailPrefix}`,
-      `Klicke <a href='${confirmLink}'>hier</a> um die Änderung am Newsletter zu bestätigen.`
+      `Bestätige deine Anmeldung zum ${dist.mailPrefix}-Verteiler`,
+      `Klicke den Bestätigungslink an, oder kopiere ihn in deinen Browser um die Änderung am Newsletter zu bestätigen: ${confirmLink}`
     );
   });
 

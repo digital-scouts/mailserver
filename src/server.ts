@@ -40,7 +40,7 @@ if (process.env.NODE_ENV === 'dev') {
 }
 
 const safeMongooseConnection = new SafeMongooseConnection({
-  mongoUrl: process.env.MONGO_URL,
+  mongoUrl: `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_URL}:${process.env.MONGO_PORT}/mailserver?authSource=admin`,
   debugCallback,
   onStartConnection: (mongoUrl: string) => {
     init.databaseLoaderService();

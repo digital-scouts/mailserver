@@ -1,9 +1,9 @@
 version: '3'
 
 services:
-  mongo:
+  mailserver-mongo:
     image: mongo:latest
-    container_name: mongo-dev
+    container_name: mailserver-mongo
     restart: always
     networks:
       - dev-network
@@ -11,6 +11,10 @@ services:
       - ./data/dev/mongo:/data/db
     ports:
       - "27017:27017"
+    command: --auth
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=santalucia
+      - MONGO_INITDB_ROOT_PASSWORD=Santa-Lucia-Mailserver2022
 
   fake-smtp:
     image: ghusta/fakesmtp:2.0

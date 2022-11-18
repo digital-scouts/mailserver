@@ -14,7 +14,7 @@ export function openConnection() {
     pool: true,
     host: process.env.MAIL_HOST,
     port: +process.env.MAIL_PORT,
-    secure: process.env.MAIL_HOST !== 'localhost',
+    secure: process.env.MAIL_SECURE === 'true',
     auth: {
       user: process.env.MAIL_USER,
       pass: process.env.MAIL_PASS
@@ -97,6 +97,7 @@ export function sendMail(to: string, subject: string, text: string) {
     (error, info) => {
       if (error) {
         logger.error(`error: ${error}`);
+        logger.error(`mail not send to ${to}`);
       }
       logger.info(`Message Sent ${info.response}`);
     }

@@ -9,6 +9,7 @@ export interface IMail extends Document {
   date: Date;
   subject: string;
   body: string;
+  contentType: string;
   from: string;
   distributor: IDistributor;
   isAnswer: boolean;
@@ -42,6 +43,9 @@ const schema = new Schema<IMail>(
     body: {
       type: String,
       required: true
+    },
+    contentType: {
+      type: String
     },
     from: {
       type: String,

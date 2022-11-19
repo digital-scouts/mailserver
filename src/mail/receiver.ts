@@ -42,6 +42,38 @@ function normalizeSender(sender: string): string {
   return normalizedSender;
 }
 
+function fixUtf8Chars(body: string): string {
+  return Buffer.from(
+    body.replace(/=([A-Fa-f0-9]{2})/g, (m, byte) =>
+      String.fromCharCode(parseInt(byte, 16))
+    ),
+    'binary'
+  ).toString('utf8');
+}
+
+function fixMailBody(buffer: string, contentType: string): string {
+  if (contentType === 'text/plain;\tcharset=utf-8') {
+    return fixUtf8Chars(buffer);
+  }
+  if (contentType.includes('multipart/alternative')) {
+    const boundary = `--${contentType.split('boundary=')[1].replace(/"/g, '')}`;
+    const parts = buffer.split(boundary);
+    const textPart = parts.find((part: string) => part.includes('text/plain'));
+    if (textPart) {
+      const headerParts = textPart.split('\r\n');
+      const nonHeaderParts = headerParts.filter(
+        (part: string) =>
+          !part.includes('Content-Transfer-Encoding:') &&
+          !part.includes('Content-Type:') &&
+          !part.includes('charset=')
+      );
+      return fixUtf8Chars(nonHeaderParts.join('\r\n'));
+    }
+  }
+
+  return buffer;
+}
+
 function handleBox(
   openBoxErr: Error,
   box: Box,
@@ -60,7 +92,7 @@ function handleBox(
     let mail = new Mail();
 
     const f = imap.fetch(results, {
-      bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE X-UID)', 'TEXT']
+      bodies: ['HEADER', 'TEXT']
     });
 
     f.on('message', (msg: ImapMessage, no: number) => {
@@ -82,17 +114,14 @@ function handleBox(
             }
             logger.debug(inspect(header));
             mail.from = normalizeSender(header.from[0]);
+            // eslint-disable-next-line prefer-destructuring
+            mail.contentType = header['content-type'][0];
             mail.distributor = distributor;
             [mail.date] = header.date;
             [mail.subject] = header.subject;
             [mail.mailId] = header['x-uid'];
           } else {
-            mail.body = Buffer.from(
-              buffer.replace(/=([A-Fa-f0-9]{2})/g, (m, byte) =>
-                String.fromCharCode(parseInt(byte, 16))
-              ),
-              'binary'
-            ).toString('utf8');
+            mail.body = fixMailBody(buffer, mail.contentType);
           }
         });
       });

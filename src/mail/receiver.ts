@@ -87,7 +87,12 @@ function handleBox(
             [mail.subject] = header.subject;
             [mail.mailId] = header['x-uid'];
           } else {
-            mail.body = buffer;
+            mail.body = Buffer.from(
+              buffer.replace(/=([A-Fa-f0-9]{2})/g, (m, byte) =>
+                String.fromCharCode(parseInt(byte, 16))
+              ),
+              'binary'
+            ).toString('utf8');
           }
         });
       });
@@ -108,6 +113,9 @@ function handleBox(
 function openConnection(imap: Connection, dis: IDistributor) {
   const prefix = `(${(imap as any)['_config'].user.split('@')[0]})`;
 
+  // lokal kommt 10x diese meldung
+  // (leiter) ERROR: Error: connect ECONNREFUSED 2a01:238:20a:202:54f0::1103:993
+  // gefolgt vom fehler
   // todo fix (node:20) MaxListenersExceededWarning: Possible EventEmitter memory leak detected.
   imap.once('ready', () => {
     logger.info(`${prefix} imap ready`);

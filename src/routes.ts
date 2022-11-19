@@ -60,10 +60,18 @@ router.get('/confirm', async (req, res) => {
     res.status(400).send('User or distributor missing in query');
     return;
   }
-  const user: IUser = await User.findById(req.query.user);
-  const distributor: IDistributor = await Distributor.findById(
-    req.query.distributor
-  );
+
+  let user: IUser;
+  let distributor: IDistributor;
+  try {
+    user = await User.findById(req.query.user);
+    distributor = await Distributor.findById(req.query.distributor);
+  } catch (e) {
+    logger.error(e);
+    res.status(400).send('User or distributor not found');
+    return;
+  }
+
   if (!user || !distributor) {
     res.status(400).send('Subscriber confirmation failed');
     return;

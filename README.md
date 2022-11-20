@@ -10,7 +10,7 @@ Dieser Mail-Server ist zur einfachen Weiterleitung von E-Mails an Opt-In Nutzer 
 
 ### Start dev server
 
-Starting the dev server also starts MongoDB as a service in a docker container using the compose script at `docker-compose.dev.yml`.
+Starting the dev server also starts MongoDB and a fake mail server as a service in a docker container using the compose script at `docker-compose.dev.yml`.
 
 ```$ npm run nodemon```
 Running the above commands results in
@@ -27,12 +27,33 @@ To edit environment variables, create a file with name `.env` and copy the conte
 |---|---|---|---|
 | NODE_ENV  | string  | `development` |API runtime environment. eg: `staging`  |
 |  PORT | number  | `3000` | Port to run the API server on |
-|  HOST | string  | `example.com:3000` | ? |
-|  MONGO_URL | string  | `mongodb://localhost:27017/mailserver` | URL for MongoDB |
-|  MAIL_HOST | string  | `localhost` | URL for Mailserver |
+|  HOST | string  | `example.com:3000` | Hostname the mail footer refers to, to unsubscribe |
+|  MONGO_URL | string  | `localhost` | URL for MongoDB |
+|  MONGO_USER | string  | `someUsername` | Username the MongoDB will be accessed |
+|  MONGO_PASS | string  | `somePassword` | Password the MongoDB will be accessed |
+|  MONGO_PORT | string  | `27017` | PORT for MongoDB |
+|  MAIL_HOST | string  | `localhost` | URL for Mailserver to send mails |
 |  MAIL_PORT | number  | `1025` | Port for Mailserver |
 |  MAIL_USER | string  | `project.1` | Username for Mailserver login |
 |  MAIL_PASS | string  | `secure.1` | Password for Mailserver login |
+|  MAIL_SECURE | boolean  | `false` | Wherever the Mailserver is in secure mode. Most local dev servers are not. |
+|  MAIL_IMAP_HOST | string  | `imap.strato.de` | Mailserver host name to receive mails |
+|  MAIL_IMAP_PORT | string  | `993` | Mailserver port name to receive mails |
+
+It is possible to observe multiple mailboxes on one server. To do so, add them to env/mails.json
+
+```json
+[
+  {
+    "user": "mailboxA@server.com",
+    "password": "Password"
+  },
+  {
+    "user": "mailboxB@server.com",
+    "password": "Password"
+  }
+]
+```
 
 ## II. Architecture
 
@@ -41,8 +62,10 @@ To edit environment variables, create a file with name `.env` and copy the conte
 ### MVP
 
 * [X] Am Verteiler mittels Opt-In anmelden
-* [X] Senden an mehrere Verteiler gleichzeitig
+* [X] E-Mails mit Formatierung
+* [ ] E-Mails mit Anhängen
 * [ ] Verteiler Einstellungen ändern (Von bestehenden abmelden, neue anmelden)
+* [ ] Antworten auf E-Mails an den Absender weiterleiten
 * Administrative Oberfläche
   * [ ] Absender zulassen (ID des Verteilers im User eintragen)
   * [ ] Verteiler hinzufügen

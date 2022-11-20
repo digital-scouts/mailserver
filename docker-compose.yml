@@ -2,27 +2,42 @@ version: "3"
 
 services:
   api-server:
-    build:
-      context: .
     container_name: mailserver
-    image: sapza/mailserver:2.0.1
+    image: sapza/mailserver:latest
     restart: unless-stopped
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    links:
+      - mailserver-mongo
+    depends_on:
+      - mailserver-mongo
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=dev
       - PORT=3000
-      - MONGO_URL=mongodb://mongo/mailserver
+      - MONGO_URL=mailserver-mongo
+      - MONGO_USER=username
+      - MONGO_PASS=password
+      - MONGO_PORT=27017
+      - HOST=scout-link.de:3000
+      - MAIL_HOST=smtp.strato.de
+      - MAIL_PORT=465
+      - MAIL_USER=leiter@scout-link.de
+      - MAIL_PASS=password
+      - MAIL_SECURE=true
+      - MAIL_IMAP_HOST=imap.strato.de
+      - MAIL_IMAP_PORT=993
     volumes:
       - ./logs:/logs
-      - ./data:/
+      - ./data:/data
     networks:
       - app-network
     ports:
       - "3000:3000"
       - "25:25"
 
-  mongo:
+  mailserver-mongo:
     image: mongo:latest
-    container_name: mongo-dev
+    container_name: mailserver-mongo
     restart: always
     networks:
       - app-network
@@ -30,6 +45,20 @@ services:
       - ./data/dev/mongo:/data/db
     ports:
       - "27017:27017"
+    command: --auth
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=username
+      - MONGO_INITDB_ROOT_PASSWORD=password
+
+  watchtower:
+    command: --label-enable --cleanup --interval 10800
+    image: containrrr/watchtower
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    network_mode: none
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 
 networks:
   app-network:

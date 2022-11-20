@@ -64,8 +64,9 @@ function fixMailBody(buffer: string, contentType: string): string {
   }
   if (contentType.includes('multipart/alternative')) {
     const boundary = `--${contentType.split('boundary=')[1].replace(/"/g, '')}`;
-    const parts = buffer.split(boundary);
-    const htmlPart = parts.find((part: string) => part.includes('text/html'));
+    const htmlPart = buffer
+      .split(boundary)
+      .find((part: string) => part.includes('text/html'));
     if (htmlPart) {
       const decodedHtml = utf8.decode(quotedPrintable.decode(htmlPart));
       const onlyInnerBody = getFirstGroup(
@@ -98,7 +99,7 @@ function handleBox(
     let mail = new Mail();
 
     const f = imap.fetch(results, {
-      bodies: ['HEADER', 'TEXT']
+      bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)', 'TEXT']
     });
 
     f.on('message', (msg: ImapMessage, no: number) => {
@@ -148,10 +149,9 @@ function handleBox(
 function openConnection(imap: Connection, dis: IDistributor) {
   const prefix = `(${(imap as any)['_config'].user.split('@')[0]})`;
 
-  // lokal kommt 10x diese meldung
-  // (leiter) ERROR: Error: connect ECONNREFUSED 2a01:238:20a:202:54f0::1103:993
-  // gefolgt vom fehler
-  // todo fix (node:20) MaxListenersExceededWarning: Possible EventEmitter memory leak detected.
+  // bug Beim 11. durchlauf des cron-jobs erscheint diese Meldung.
+  // Das Program ist nicht weiter beeinträchtigt
+  // (node:20) MaxListenersExceededWarning: Possible EventEmitter memory leak detected.
   imap.once('ready', () => {
     logger.info(`${prefix} imap ready`);
     imap.openBox('INBOX', true, (err: Error, box: Box) => {

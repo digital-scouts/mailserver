@@ -1,11 +1,11 @@
 import * as nodemailer from 'nodemailer';
 import SMTPPool from 'nodemailer/lib/smtp-pool';
 import path from 'path';
+import Email from 'email-templates';
 import { IDistributor } from '../models/distriburor';
 import logger from '../logger';
 
 const { htmlToText } = require('nodemailer-html-to-text');
-const Email = require('email-templates');
 
 let transporter: nodemailer.Transporter<SMTPPool.SentMessageInfo> = null;
 

@@ -1,6 +1,8 @@
 import Connection, { Box, ImapFetch, ImapMessage } from 'imap';
 import { CronJob } from 'cron';
 import { inspect } from 'util';
+import * as quotedPrintable from 'quoted-printable';
+import * as utf8 from 'utf8';
 import logger from '../logger';
 import imapMails from '../env/mails.json';
 import Mail from '../models/mail';
@@ -51,6 +53,11 @@ function fixUtf8Chars(body: string): string {
   ).toString('utf8');
 }
 
+function getFirstGroup(regexp: RegExp, str: string) {
+  const array = [...str.matchAll(regexp)];
+  return array.map(m => m[1]);
+}
+
 function fixMailBody(buffer: string, contentType: string): string {
   if (contentType === 'text/plain;\tcharset=utf-8') {
     return fixUtf8Chars(buffer);
@@ -58,16 +65,25 @@ function fixMailBody(buffer: string, contentType: string): string {
   if (contentType.includes('multipart/alternative')) {
     const boundary = `--${contentType.split('boundary=')[1].replace(/"/g, '')}`;
     const parts = buffer.split(boundary);
-    const textPart = parts.find((part: string) => part.includes('text/plain'));
-    if (textPart) {
-      const headerParts = textPart.split('\r\n');
-      const nonHeaderParts = headerParts.filter(
-        (part: string) =>
-          !part.includes('Content-Transfer-Encoding:') &&
-          !part.includes('Content-Type:') &&
-          !part.includes('charset=')
-      );
-      return fixUtf8Chars(nonHeaderParts.join('\r\n'));
+    const htmlPart = parts.find((part: string) => part.includes('text/html'));
+    if (htmlPart) {
+      const headerParts = htmlPart.split('\r\n');
+      const nonHeaderParts = headerParts
+        .filter(
+          (part: string) =>
+            !part.includes('Content-Transfer-Encoding:') &&
+            !part.includes('Content-Type:') &&
+            !part.includes('charset=')
+        )
+        .join('');
+      // remove <head> part from html
+      const decodedHtml = utf8.decode(quotedPrintable.decode(nonHeaderParts));
+      const onlyInnerBody = getFirstGroup(
+        /<body[^>]*>((.|\r|\n)*?)<\/body/g,
+        buffer
+      )[0];
+
+      return onlyInnerBody;
     }
   }
 

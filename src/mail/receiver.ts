@@ -67,20 +67,10 @@ function fixMailBody(buffer: string, contentType: string): string {
     const parts = buffer.split(boundary);
     const htmlPart = parts.find((part: string) => part.includes('text/html'));
     if (htmlPart) {
-      const headerParts = htmlPart.split('\r\n');
-      const nonHeaderParts = headerParts
-        .filter(
-          (part: string) =>
-            !part.includes('Content-Transfer-Encoding:') &&
-            !part.includes('Content-Type:') &&
-            !part.includes('charset=')
-        )
-        .join('');
-      // remove <head> part from html
-      const decodedHtml = utf8.decode(quotedPrintable.decode(nonHeaderParts));
+      const decodedHtml = utf8.decode(quotedPrintable.decode(htmlPart));
       const onlyInnerBody = getFirstGroup(
         /<body[^>]*>((.|\r|\n)*?)<\/body/g,
-        buffer
+        decodedHtml
       )[0];
 
       return onlyInnerBody;

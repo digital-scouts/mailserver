@@ -1,6 +1,6 @@
 [![Docker Image](https://github.com/JanneckLange/mailserver/actions/workflows/pushToDocker.yml/badge.svg?branch=master)](https://hub.docker.com/repository/docker/sapza/mailserver)
 
-[![wakatime](https://wakatime.com/badge/user/f75702c6-6ecd-478f-a765-9c0a07c62d50/project/211f7cb7-35d5-4675-a4ba-91e94c2bcdfc.svg)](https://wakatime.com/badge/user/f75702c6-6ecd-478f-a765-9c0a07c62d50/project/211f7cb7-35d5-4675-a4ba-91e94c2bcdfc)
+[![wakatime](https://wakatime.com/badge/user/f75702c6-6ecd-478f-a765-9c0a07c62d50/project/211f7cb7-35d5-4675-a4ba-91e94c2bcdfc.svg)](https://wakatime.com/@f75702c6-6ecd-478f-a765-9c0a07c62d50)
 
 # Mailserver
 

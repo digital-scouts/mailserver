@@ -6,7 +6,7 @@
     "noImplicitAny": true,
     "moduleResolution": "node",
     "sourceMap": true,
-//    "outDir": "dist",
+    "skipLibCheck": true,
     "baseUrl": ".",
     "lib": ["ES2020"],
     "types": ["node"],
